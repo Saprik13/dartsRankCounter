@@ -1,0 +1,23 @@
+@media (max-width: 768px) {
+  .params-grid {
+    grid-template-columns: 1fr;
+  }
+  .player-table-header,
+  .player-row-item {
+    grid-template-columns: 1fr;
+  }
+  .place-header,
+  .place-row {
+    grid-template-columns: 1fr;
+  }
+  .detected-header,
+  .detected-row {
+    grid-template-columns: 1fr;
+  }
+  .step-connector {
+    width: 30px;
+  }
+  .site-header h1 {
+    font-size: 2em;
+  }
+}

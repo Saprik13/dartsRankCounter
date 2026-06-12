@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Darts Rank Counter</title>
+     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="/css/style.css" />
+     <link rel="stylesheet" href="/css/responsive.css" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAMAEBAAAAEAIADtAAAANgAAACAgAAABACAA2wEAACMBAAAwMAAAAQAgANICAAD+AgAAiVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAtElEQVR42q1TwQmEMBC0ATkQuZ/dpZiUkSIswQ7ytYjzm49mZTfMrVkFSWBIiDPDbHbtutar78cpw2fEjJkR+W56EruMxKIdDORM39yd+CSHMO/j8C0GcJbd1WInEQu25YMpME36K4frOwlogCa/NWgzjwb0SCV2zUQMmEOIaFCciUgCFAt0CtOAdhRaZZglEFGSaLFVgq+lEKNKJy6PWNpokO/bqAdJDc/zIDUZ5SY/05t1AL1D7aibPvowAAAAAElFTkSuQmCCiVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABoklEQVR42tVXyW3DMBB0A3aAwPDTVaQRlaAG0oRbUAH6uAOWkIfeebsDfpy/AUcUdoXReCmRPhDGwMDUwZ3Zg0tqtfpPv/V6W/VoenQ9fI+LwMu98Kx6Nummx0FIrrvPjwFhjKD7XuZsHiWvkRgIncC8JiH1veQNGRsJtu+74Tr845gE4dwml/zIIUbCmAC8NuYfszy3PI6R8jgWkcVISM6zvc6MRj1X7R6LjQ22rRsNnk/t+B6M3VxtiG1vrg5ZNhNyNBTIFYFQSAdCuo5FAnGwBKj3jj1R7xE/X29RAZE0DNAoWB3uahUdhjwmQsnDPBBz4wxFoZpUPuce1avRmAgVgO+hKE6DcDUooNPw4wReSsFoIERyBRNbzqhDwtVN8s8hY6ABJEZY/SCCaR3IjmYq5rCqhxa59e5MRC8PCUARvBruEZCVAhbi9vtvLrrcFCQXIZIvNaScIkxehkiOxFYacpZhUiPSnMYE0LP0RpTSirHNJoQ+rxWnbEbggXvVZrS4HXNKnrod//mBpIgjWRGH0iKO5UV8mBTxaVbEx+mrf78iAxjUJEgP+QAAAABJRU5ErkJggolQTkcNChoKAAAADUlIRFIAAAAwAAAAMAgGAAAAVwL5hwAAAplJREFUeNrtWr1uwjAQzgugSlXECDtznyU7L9CVp2BnzEN4yV6egs5slSg7Su3KRpfLnX2JnRSsIp1K47/vs787nx2K4v9TFItFWWqrtO21NdpO2q7abtau9llj65i65SMA31pQrbPl+5vXYF3bdvsXwHfazhxoBLIV1DN97eYAXlkp+AArjgAuI/owfVdTgT8EgHeAlq/LFpqPGNHnISXwtbYjHAjPKAVW+KxDDPVvxlzHgt9gyYRmeggBamUISW1iZv4OHg6CBlcRK9Bpj4kAEusxBI4+8GPADpAVJnEc7bASueAyCVhu9bCsBju2DZU9zYd0TIFDzq6kPgFXAuGoJAROFHiJlj0xnyqTrBImcZLssCx4bqC6Vr/PLp916ww5Z69MMjGYhP2+8xE4+2afGtCAdzaUQEiazCqcfYkZBK98juYGhgQwCVfPQywEXkF5AmxbikBDyYcjYsodII5EiAB4xgJnZNRQ+bxXOng2MChM4vvj5d7GBx6S8K06QaIkQ6dE+1jTIRKYAG4L/ELkC72Qak9JUgL32cIgDGAI3pkQvGhcgHHf0T/wciXpiIswEDg0LDvGoUPjKoCz6W1eeKNhjPWREAkKOLWyobF7m5o5dEv1T+kWx3xjGHzbXlqqnm8DDMjoCgncpPqnNMxEFAxe3FZI4DYbAff/lASSS4g50E8moaROjEOj+a5Wq68pnThZGHUyMH8NaAec2jtShtEkG5nLf1wZlAjIa9QUG1l0KoHBYwJCEqNTiahkDmaeEgKMz4xP5mLSaQ688DygkqTTMQcan0PPeqAZe6TknHr2I2XMoX4sgeSH+qe/VsniYuvprxazuNzN4nr96V9wZPGKKYuXfNm8Zs3iRXc2PzXI5scej/D5ASTP0ZJAGYBAAAAAAElFTkSuQmCC">
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABoklEQVR42tVXyW3DMBB0A3aAwPDTVaQRlaAG0oRbUAH6uAOWkIfeebsDfpy/AUcUdoXReCmRPhDGwMDUwZ3Zg0tqtfpPv/V6W/VoenQ9fI+LwMu98Kx6Nummx0FIrrvPjwFhjKD7XuZsHiWvkRgIncC8JiH1veQNGRsJtu+74Tr845gE4dwml/zIIUbCmAC8NuYfszy3PI6R8jgWkcVISM6zvc6MRj1X7R6LjQ22rRsNnk/t+B6M3VxtiG1vrg5ZNhNyNBTIFYFQSAdCuo5FAnGwBKj3jj1R7xE/X29RAZE0DNAoWB3uahUdhjwmQsnDPBBz4wxFoZpUPuce1avRmAgVgO+hKE6DcDUooNPw4wReSsFoIERyBRNbzqhDwtVN8s8hY6ABJEZY/SCCaR3IjmYq5rCqhxa59e5MRC8PCUARvBruEZCVAhbi9vtvLrrcFCQXIZIvNaScIkxehkiOxFYacpZhUiPSnMYE0LP0RpTSirHNJoQ+rxWnbEbggXvVZrS4HXNKnrod//mBpIgjWRGH0iKO5UV8mBTxaVbEx+mrf78iAxjUJEgP+QAAAABJRU5ErkJggg==">
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABoklEQVR42tVXyW3DMBB0A3aAwPDTVaQRlaAG0oRbUAH6uAOWkIfeebsDfpy/AUcUdoXReCmRPhDGwMDUwZ3Zg0tqtfpPv/V6W/VoenQ9fI+LwMu98Kx6Nummx0FIrrvPjwFhjKD7XuZsHiWvkRgIncC8JiH1veQNGRsJtu+74Tr845gE4dwml/zIIUbCmAC8NuYfszy3PI6R8jgWkcVISM6zvc6MRj1X7R6LjQ22rRsNnk/t+B6M3VxtiG1vrg5ZNhNyNBTIFYFQSAdCuo5FAnGwBKj3jj1R7xE/X29RAZE0DNAoWB3uahUdhjwmQsnDPBBz4wxFoZpUPuce1avRmAgVgO+hKE6DcDUooNPw4wReSsFoIERyBRNbzqhDwtVN8s8hY6ABJEZY/SCCaR3IjmYq5rCqhxa59e5MRC8PCUARvBruEZCVAhbi9vtvLrrcFCQXIZIvNaScIkxehkiOxFYacpZhUiPSnMYE0LP0RpTSirHNJoQ+rxWnbEbggXvVZrS4HXNKnrod//mBpIgjWRGH0iKO5UV8mBTxaVbEx+mrf78iAxjUJEgP+QAAAABJRU5ErkJggg==">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="/js/app.js" defer></script>
+     
+  </head>
+  <body>
+  <div class="container">
+    <div class="site-header">
+        <div class="lang-switcher">
+            <button class="lang-btn active" id="btnUA" onclick="setLang('uk')">🇺🇦 UA</button>
+            <button class="lang-btn" id="btnEN" onclick="setLang('en')">🇬🇧 EN</button>
+        </div>
+        <h1>🎯 <span data-i18n="appTitle">Рейтинг дартс</span></h1>
+        <p data-i18n="appSubtitle">Калькулятор турнірних очок</p>
+    </div>
+ 
+    <!-- Steps nav -->
+    <div class="steps-nav" id="stepsNav">
+        <div class="step-dot active" id="nav1">
+            <div class="dot">1</div>
+            <div class="dot-label" data-i18n="litestep1Label">Гравці</div>
+        </div>
+        <div class="step-connector" id="conn1"></div>
+        <div class="step-dot" id="nav2">
+            <div class="dot">2</div>
+            <div class="dot-label" data-i18n="litestep2Label">Місця</div>
+        </div>
+        <div class="step-connector" id="conn2"></div>
+        <div class="step-dot" id="nav3">
+            <div class="dot">3</div>
+            <div class="dot-label" data-i18n="litestep3Label">Результат</div>
+        </div>
+    </div>
+ 
+    <!-- STEP 1 -->
+    <div class="card" id="step1">
+        <div class="card-header">
+            <div class="card-step-num">01</div>
+            <div class="card-title" data-i18n="s1Title">Імпорт гравців з поточним рейтингом</div>
+        </div>
+ 
+        <!-- Nickname mappings -->
+        <div class="mapping-section">
+            <h4 data-i18n="nicknameTitle">🔗 Відповідність нікнеймів</h4>
+            <div class="mapping-tags" id="mappingDisplay">
+                <div class="mapping-tag"><strong>Elvis</strong> → Корпусов Андрій</div>
+                <div class="mapping-tag"><strong>Saprik</strong> → Сапронов Петро</div>
+                <div class="mapping-tag"><strong>Чубатий</strong> → Матвійчук Олександр</div>
+                <div class="mapping-tag"><strong>Юля</strong> → Софлюк Юлія</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="toggleMappingEdit()" data-i18n="btnEditNicknames">✏️ Редагувати нікнейми</button>
+            <div id="mappingEdit" class="hidden" style="margin-top: 14px;">
+                <div id="mappingList"></div>
+                <button class="btn btn-secondary btn-sm" onclick="addMapping()" data-i18n="btnAddMapping">+ Додати</button>
+                <button class="btn btn-success btn-sm" onclick="saveMappings()" data-i18n="btnSaveMappings">💾 Зберегти</button>
+            </div>
+        </div>
+ 
+       
+        <div class="form-group">
+            <label data-i18n="importLabel">📋 Вставте дані з Google Sheets:</label>
+            <textarea id="importData" data-i18n-placeholder="importPlaceholder" placeholder="Виділіть комірки → Ctrl+C → Ctrl+V сюди"></textarea>
+        </div>
+ 
+        <!-- Tournament params -->
+        <div class="params-grid">
+            <div class="form-group">
+                <label data-i18n="tournamentTypeLabel">Тип турніру</label>
+                <select id="tournamentType" onchange="updateTournamentInfo()">
+                    <option value="groups_playoff" selected data-i18n="typeGroupsPlayoff">Кілька груп + плей-офф</option>
+                    <option value="single_group" data-i18n="typeSingleGroup">1 група (до 7 гравців)</option>
+                    <option value="single_group_playoff" data-i18n="typeSingleGroupPlayoff">1 група + плей-офф</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label data-i18n="playerCountLabel">Кількість учасників</label>
+                <select id="playerCount" onchange="updateTournamentInfo()">
+                    <option value="3">3</option><option value="4">4</option><option value="5">5</option>
+                    <option value="6">6</option><option value="7">7</option><option value="8">8</option>
+                    <option value="9">9</option><option value="10" selected>10</option>
+                    <option value="11">11</option><option value="12">12+</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label data-i18n="groupCountLabel">Кількість груп</label>
+                <select id="groupCount" onchange="updateTournamentInfo()">
+                    <option value="1" data-i18n="group1">1 група</option>
+                    <option value="2" selected data-i18n="group2">2 групи</option>
+                    <option value="3" data-i18n="group3opt">3 групи</option>
+                    <option value="4" data-i18n="group4opt">4 групи</option>
+                </select>
+            </div>
+        </div>
+        <div class="params-grid params-grid-2" style="margin-top:-8px;">
+            <div class="form-group">
+                <label data-i18n="thirdPlaceLabel">Треті місця у плей-офф</label>
+                <select id="thirdPlaceOption" onchange="updateTournamentInfo()">
+                    <option value="auto" selected data-i18n="thirdAuto">Авто (2 групи — виходять, 3 групи — 2 кращих)</option>
+                    <option value="yes" data-i18n="thirdYes">Виходять (всі треті місця)</option>
+                    <option value="no" data-i18n="thirdNo">Не виходять</option>
+                </select>
+            </div>
+            <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:4px;">
+                <div>
+                    <label data-i18n="coefLabel">Коефіцієнт турніру</label>
+                    <div class="coef-badge">× <span id="coefDisplay">1.25</span></div>
+                </div>
+            </div>
+        </div>
+ 
+        <!-- Scheme info -->
+        <div class="scheme-box" id="schemeInfo">
+            <h4 data-i18n="schemeTitle">📊 Схема нарахування балів</h4>
+            <ul id="schemeList"></ul>
+        </div>
+ 
+        <div style="margin-bottom:8px;">
+            <button class="btn btn-primary" onclick="importPlayers()" data-i18n="btnImport">📥 Імпортувати гравців</button>
+            <button class="btn btn-secondary" onclick="clearImport()" data-i18n="btnClear">🗑️ Очистити</button>
+        </div>
+ 
+        <div id="importError" class="alert alert-error hidden"></div>
+        <div id="importSuccess" class="alert alert-success hidden"></div>
+ 
+        <div id="importedPlayers" class="hidden mt-16">
+            <div class="section-title" data-i18n="importedTitle">📋 Імпортовані гравці:</div>
+            <div class="player-table-header">
+                <div data-i18n="colPlayer">Гравець</div><div data-i18n="colRating">Рейтинг</div><div data-i18n="colPlace">Місце</div><div data-i18n="colPoints">Бали</div><div data-i18n="colNewRating">Новий рейтинг</div><div></div>
+            </div>
+            <div id="playersList"></div>
+        </div>
+    </div>
+ 
+ 
+    <!-- STEP 3 -->
+    <div class="card hidden" id="step3">
+        <div class="card-header">
+            <div class="card-step-num">02</div>
+            <div class="card-title" data-i18n="s3Title">Визначення місць у турнірі</div>
+        </div>
+        <div class="info-box">
+            <p><strong data-i18n="s3InfoTitle">🎯 Оберіть місце для кожного гравця:</strong></p>
+            <p data-i18n="s3InfoDesc">Місце визначає кількість отриманих рейтингових балів</p>
+            <p class="highlight" data-i18n="s3InfoWarn">Якщо місце не обрано — гравець отримає 0 балів</p>
+            <p id="schemeText2Groups" style="margin-top:6px;" data-i18n="scheme2Groups1">• 1-і місця груп → одразу в <strong>півфінал</strong></p>
+            <p id="schemeText2Groups2" data-i18n="scheme2Groups2">• 2-3 місця груп → в <strong>чвертьфінал</strong></p>
+            <p id="schemeText4Groups" class="hidden" data-i18n="scheme4Groups1">• 1-і місця (4 гравці) → одразу в <strong>чвертьфінал</strong></p>
+            <p id="schemeText4Groups2" class="hidden" data-i18n="scheme4Groups2">• 2-3 місця → в <strong>1/8 фіналу</strong></p>
+            <p class="ok" style="margin-top:4px;"><strong data-i18n="schemeThirdNote">⚠️ При 2 групах треті місця виходять за замовчуванням</strong></p>
+        </div>
+ 
+        <div class="quick-fill">
+            <button class="btn btn-secondary btn-sm" onclick="fillPlaces('winner')" data-i18n="qfWinner">🏆 Переможець</button>
+            <button class="btn btn-secondary btn-sm" onclick="fillPlaces('finalist')" data-i18n="qfFinalist">🥈 Фіналіст</button>
+            <button class="btn btn-secondary btn-sm" onclick="fillPlaces('semi')" data-i18n="qfSemi">🥉 Півфіналісти</button>
+            <button class="btn btn-secondary btn-sm" onclick="fillPlaces('quarter')" data-i18n="qfQuarter">⚔️ 1/4 фіналу</button>
+            <button class="btn btn-secondary btn-sm" onclick="fillPlaces('group3')" data-i18n="qfGroup3">📊 Група 3 місце</button>
+            <button class="btn btn-secondary btn-sm" onclick="fillPlaces('group4')" data-i18n="qfGroup4">📊 Група 4 місце</button>
+            <button class="btn btn-secondary btn-sm" onclick="fillPlaces('group5')" data-i18n="qfGroup5">📊 Група 5 місце</button>
+            <button class="btn btn-warning btn-sm" onclick="clearAllPlaces()" data-i18n="qfClearAll">🗑️ Очистити всі</button>
+        </div>
+ 
+        <div id="placeAssignment">
+            <div class="place-header">
+                <div data-i18n="colPlayer">Гравець</div><div data-i18n="colRating">Рейтинг</div><div data-i18n="colTournamentPlace">Місце в турнірі</div><div data-i18n="colPoints">Бали</div><div data-i18n="colNewRating">Новий рейтинг</div><div></div>
+            </div>
+            <div id="placeList"></div>
+        </div>
+ 
+        <div style="margin-top:20px;">
+            <button class="btn btn-success" onclick="calculateRating()" data-i18n="btnCalculate">🎯 Розрахувати рейтинг</button>
+            <button class="btn btn-secondary" onclick="backToStep1()" data-i18n="btnBack">⬅️ Назад</button>
+        </div>
+    </div>
+ 
+    <!-- STEP 4 -->
+    <div class="card hidden" id="step4">
+        <div class="card-header">
+            <div class="card-step-num">03</div>
+            <div class="card-title" data-i18n="s4Title">Новий рейтинг</div>
+        </div>
+        <div class="info-box">
+            <p id="tournamentSummary"></p>
+        </div>
+        <div style="margin-bottom:18px;">
+            <button class="btn btn-primary" onclick="exportToCSV()" data-i18n="btnExportCSV">📊 Експорт в CSV</button>
+            <button class="btn btn-secondary" onclick="copyToClipboard()" data-i18n="btnCopy">📋 Копіювати</button>
+            <button class="btn btn-secondary" onclick="backToStep3()" data-i18n="btnBack">⬅️ Назад</button>
+            <button class="btn btn-warning" onclick="resetAll()" data-i18n="btnNewTournament">🔄 Новий турнір</button>
+        </div>
+        <div id="copyAlert" class="alert alert-success hidden" data-i18n="copiedMsg">✅ Скопійовано!</div>
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th data-i18n="colPlayer">Гравець</th>
+                    <th data-i18n="colCurrentRating">Поточний рейтинг</th>
+                    <th data-i18n="colPlace">Місце</th>
+                    <th data-i18n="colEarned">Отримано балів</th>
+                    <th data-i18n="colNewRating">Новий рейтинг</th>
+                    <th data-i18n="colChange">Зміна</th>
+                </tr>
+            </thead>
+            <tbody id="resultTable"></tbody>
+        </table>
+    </div>
+</div>
+  </body>
+</html>
