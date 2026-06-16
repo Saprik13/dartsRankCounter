@@ -41,23 +41,29 @@
         </div>
         <h1>🎯 <span data-i18n="appTitle">Рейтинг дартс</span></h1>
         <p data-i18n="appSubtitle">Калькулятор турнірних очок</p>
+        <div class="header-line"></div>
       </div>
 
       <!-- Steps nav -->
       <div class="steps-nav" id="stepsNav">
         <div class="step-dot active" id="nav1">
           <div class="dot">1</div>
-          <div class="dot-label" data-i18n="litestep1Label">Гравці</div>
+          <div class="dot-label" data-i18n="step1Label">Гравці</div>
         </div>
         <div class="step-connector" id="conn1"></div>
         <div class="step-dot" id="nav2">
           <div class="dot">2</div>
-          <div class="dot-label" data-i18n="litestep2Label">Місця</div>
+          <div class="dot-label" data-i18n="step2Label">Фото</div>
         </div>
         <div class="step-connector" id="conn2"></div>
         <div class="step-dot" id="nav3">
           <div class="dot">3</div>
-          <div class="dot-label" data-i18n="litestep3Label">Результат</div>
+          <div class="dot-label" data-i18n="step3Label">Місця</div>
+        </div>
+        <div class="step-connector" id="conn3"></div>
+        <div class="step-dot" id="nav4">
+          <div class="dot">4</div>
+          <div class="dot-label" data-i18n="step4Label">Результат</div>
         </div>
       </div>
 
@@ -111,6 +117,41 @@
           </div>
         </div>
 
+        <!-- Format info -->
+        <div class="info-box">
+          <p>
+            <strong data-i18n="importFormatTitle"
+              >📋 Формат вставки з Google Sheets:</strong
+            >
+          </p>
+          <p data-i18n="importFormatDesc">
+            Прізвище Ім'я
+            <kbd
+              style="
+                background: var(--surface2);
+                padding: 1px 5px;
+                border-radius: 3px;
+                font-size: 0.85em;
+              "
+              >Tab</kbd
+            >
+            Рейтинг
+          </p>
+          <p
+            class="highlight"
+            style="margin-top: 8px"
+            data-i18n="importFormatExample"
+          >
+            Приклад:
+          </p>
+          <p style="font-family: monospace; font-size: 0.88em">
+            Форманюк Андрій&nbsp;&nbsp;&nbsp;&nbsp;1003,75
+          </p>
+          <p style="font-family: monospace; font-size: 0.88em">
+            Корпусов Андрій&nbsp;&nbsp;&nbsp;&nbsp;961,25
+          </p>
+        </div>
+
         <div class="form-group">
           <label data-i18n="importLabel"
             >📋 Вставте дані з Google Sheets:</label
@@ -118,7 +159,7 @@
           <textarea
             id="importData"
             data-i18n-placeholder="importPlaceholder"
-            placeholder="Виділіть комірки → Ctrl+C → Ctrl+V сюди"
+            placeholder="Форманюк Андрій	1003,75&#10;Корпусов Андрій	961,25&#10;Томчук Олег	862,5&#10;..."
           ></textarea>
         </div>
 
@@ -236,10 +277,179 @@
         </div>
       </div>
 
+      <!-- STEP 2 -->
+      <div class="card hidden" id="step2">
+        <div class="card-header">
+          <div class="card-step-num">02</div>
+          <div class="card-title" data-i18n="s2Title">
+            Завантаження результатів (зображення)
+          </div>
+        </div>
+        <div class="info-box">
+          <p>
+            <strong data-i18n="s2InfoTitle"
+              >📸 Завантажте зображення з результатами турніру</strong
+            >
+          </p>
+          <p data-i18n="s2InfoDesc">
+            AI (Claude Vision) автоматично розпізнає імена та місця гравців
+          </p>
+          <p class="ok">
+            <strong>💡</strong>
+            <span data-i18n="s2InfoTip"
+              >Якщо AI не впевнений — місце можна виправити вручну на кроці
+              3</span
+            >
+          </p>
+        </div>
+        <div
+          class="upload-area"
+          id="imageUploadArea"
+          onclick="document.getElementById('imageInput').click()"
+        >
+          <div class="icon">📸</div>
+          <p>
+            <strong data-i18n="uploadTitle"
+              >Натисніть або перетягніть зображення сюди</strong
+            >
+          </p>
+          <p data-i18n="uploadFormats">JPG, PNG, GIF, WebP</p>
+        </div>
+        <input
+          type="file"
+          id="imageInput"
+          accept="image/*"
+          class="hidden"
+          onchange="handleImageUpload(event)"
+        />
+
+        <div id="imagePreviewContainer" class="hidden">
+          <div class="section-title mt-16" data-i18n="imagePreviewTitle">
+            🖼️ Завантажене зображення:
+          </div>
+          <div class="image-wrap">
+            <img
+              id="uploadedImage"
+              class="image-preview"
+              alt="Tournament results"
+            />
+            <button class="remove-image-btn" onclick="removeImage()">×</button>
+          </div>
+          <div style="margin-top: 14px">
+            <button
+              class="btn btn-primary"
+              id="analyzeBtn"
+              onclick="analyzeWithAI()"
+              data-i18n="btnAnalyzeAI"
+            >
+              🤖 Розпізнати місця через AI
+            </button>
+            <button
+              class="btn btn-secondary"
+              onclick="skipAI()"
+              data-i18n="btnSkipAI"
+            >
+              ⏭️ Пропустити (вручну)
+            </button>
+          </div>
+        </div>
+
+        <!-- AI processing status -->
+        <div id="aiProcessing" class="hidden" style="margin-top: 18px">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              margin-bottom: 8px;
+            "
+          >
+            <div class="ai-spinner"></div>
+            <span
+              id="aiStatusText"
+              style="color: var(--muted); font-size: 0.9em"
+              data-i18n="aiStatusSending"
+              >Надсилаємо зображення до Claude Vision...</span
+            >
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              id="progressFill"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+
+        <div
+          id="aiError"
+          class="alert alert-error hidden"
+          style="margin-top: 12px"
+        ></div>
+
+        <div id="detectedResults" class="hidden" style="margin-top: 16px">
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 10px;
+            "
+          >
+            <div
+              class="section-title"
+              style="margin: 0"
+              data-i18n="detectedTitle"
+            >
+              🔍 Розпізнані місця:
+            </div>
+            <div
+              id="aiConfidenceBadge"
+              style="font-size: 0.82em; padding: 3px 10px; border-radius: 12px"
+            ></div>
+          </div>
+          <div class="detected-header">
+            <div data-i18n="colPlayer">Гравець</div>
+            <div data-i18n="colDetectedAs">Розпізнане ім'я</div>
+            <div data-i18n="colPlace">Місце</div>
+            <div data-i18n="colConfidence">Впевненість</div>
+          </div>
+          <div id="detectedList"></div>
+          <div class="info-box" style="margin-top: 14px">
+            <p class="highlight">
+              <strong data-i18n="detectedCheckTitle"
+                >⚠️ Перевірте результати перед переходом до кроку 3</strong
+              >
+            </p>
+            <p data-i18n="detectedCheckDesc">
+              Місця будуть автоматично підставлені — ви зможете виправити
+              будь-яке вручну
+            </p>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px">
+          <button
+            class="btn btn-success"
+            onclick="goToStep3()"
+            data-i18n="btnGoToStep3"
+          >
+            ✅ Перейти до розподілу місць
+          </button>
+          <button
+            class="btn btn-secondary"
+            onclick="backToStep1()"
+            data-i18n="btnBack"
+          >
+            ⬅️ Назад
+          </button>
+        </div>
+      </div>
+
       <!-- STEP 3 -->
       <div class="card hidden" id="step3">
         <div class="card-header">
-          <div class="card-step-num">02</div>
+          <div class="card-step-num">03</div>
           <div class="card-title" data-i18n="s3Title">
             Визначення місць у турнірі
           </div>
@@ -310,24 +520,17 @@
           </button>
           <button
             class="btn btn-secondary btn-sm"
+            onclick="fillPlaces('eighth')"
+            data-i18n="qfEighth"
+          >
+            ⚔️ 1/8 фіналу
+          </button>
+          <button
+            class="btn btn-secondary btn-sm"
             onclick="fillPlaces('group3')"
             data-i18n="qfGroup3"
           >
             📊 Група 3 місце
-          </button>
-          <button
-            class="btn btn-secondary btn-sm"
-            onclick="fillPlaces('group4')"
-            data-i18n="qfGroup4"
-          >
-            📊 Група 4 місце
-          </button>
-          <button
-            class="btn btn-secondary btn-sm"
-            onclick="fillPlaces('group5')"
-            data-i18n="qfGroup5"
-          >
-            📊 Група 5 місце
           </button>
           <button
             class="btn btn-warning btn-sm"
@@ -360,7 +563,7 @@
           </button>
           <button
             class="btn btn-secondary"
-            onclick="backToStep1()"
+            onclick="backToStep2()"
             data-i18n="btnBack"
           >
             ⬅️ Назад
@@ -371,7 +574,7 @@
       <!-- STEP 4 -->
       <div class="card hidden" id="step4">
         <div class="card-header">
-          <div class="card-step-num">03</div>
+          <div class="card-step-num">04</div>
           <div class="card-title" data-i18n="s4Title">Новий рейтинг</div>
         </div>
         <div class="info-box">
@@ -391,13 +594,6 @@
             data-i18n="btnCopy"
           >
             📋 Копіювати
-          </button>
-          <button
-            class="btn btn-secondary"
-            onclick="backToStep3()"
-            data-i18n="btnBack"
-          >
-            ⬅️ Назад
           </button>
           <button
             class="btn btn-warning"
