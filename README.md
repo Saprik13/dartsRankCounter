@@ -1,14 +1,61 @@
-🎯 Darts Rating Calculator for Lutsk Pub Darts
+# Darts Rank Counter — client-side OCR
 
-A single-file web application for calculating rating points after darts tournaments. Supports flexible tournament formats, and a bilingual interface.
+Калькулятор рейтингу для турнірів із дартсу з повністю браузерним розпізнаванням результатів. Зображення обробляється локально через Tesseract.js і не надсилається в Claude, Google Cloud чи інший API.
 
+## Як працює OCR
 
-✨ Features
+1. Зображення масштабується, переводиться у grayscale і підсилюється контраст.
+2. Tesseract.js розпізнає український та англійський текст у Web Worker.
+3. Розпізнані рядки fuzzy-зіставляються з повними іменами, прізвищами та нікнеймами.
+4. Місце визначається з явних підписів (`winner`, `фіналіст`, `1/4`, групове місце) або номера на початку рядка.
+5. Для одиночної групи застосовується резервне визначення місця за вертикальним порядком таблиці.
+6. Неоднозначні результати позначаються як `mid` або `low` і виправляються вручну на кроці 3.
 
-📥 Player Import — paste directly from Google Sheets (tab-separated)
-🔗 Nickname Mapping — map in-game nicknames to players' full names
-⚙️ Flexible Tournament Setup — type, player count, group count, 3rd-place advancement rules
-🧮 Accurate Calculation — coefficients from ×0.5 to ×1.5 based on participant count
-📊 Export — download results as CSV or copy to clipboard
-🌐 Bilingual UI — instant toggle between 🇺🇦 UA and 🇬🇧 EN
-📱 Responsive — works on mobile devices
+## Чому немає `fetch`-помилки
+
+Усі runtime-залежності збережено в репозиторії:
+
+- `vendor/tesseract` — Tesseract.js 7.0.0 і Web Worker;
+- `vendor/tesseract-core` — звичайний, SIMD та relaxed-SIMD WebAssembly core;
+- `vendor/tessdata` — стиснені `ukr` та `eng` fast-моделі.
+
+Шляхи формуються відносно `js/ocr.js`, тому вони працюють і в підкаталозі GitHub Pages. CDN під час розпізнавання не використовується.
+
+Застосунок необхідно відкривати через HTTP або HTTPS. При запуску `index.html` напряму як `file://` браузер блокує Web Worker та `importScripts`.
+
+## Локальний запуск
+
+Із кореня репозиторію запустіть будь-який статичний сервер, наприклад:
+
+```powershell
+npx http-server . -p 8000
+```
+
+Після цього відкрийте `http://localhost:8000`.
+
+Smoke-test повного OCR-потоку доступний за адресою:
+
+```text
+http://localhost:8000/tests/ocr-smoke.html
+```
+
+## GitHub Pages
+
+У **Settings → Pages** виберіть:
+
+- Source: `Deploy from a branch`;
+- Branch: `codex/client-side-ocr`;
+- Folder: `/ (root)`.
+
+API-ключі, `.env` і backend не потрібні.
+
+## Обмеження
+
+- Перший запуск завантажує приблизно 10 МБ потрібного core та мовних моделей; надалі браузер кешує traineddata.
+- Tesseract читає текст, але не розуміє довільну турнірну сітку так само, як vision-модель.
+- Найкращий результат дають чіткі таблиці з номером місця перед іменем.
+- Фото під кутом, дрібний текст, декоративні шрифти та складні bracket-схеми можуть вимагати ручної корекції.
+
+## Ліцензії
+
+Tesseract.js, tesseract.js-core і мовні моделі поширюються з відповідними файлами ліцензій у каталозі `vendor`.

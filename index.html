@@ -26,6 +26,8 @@
       href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
+    <script src="./vendor/tesseract/tesseract.min.js" defer></script>
+    <script src="./js/ocr.js" defer></script>
     <script src="./js/app.js" defer></script>
   </head>
   <body>
@@ -292,7 +294,7 @@
             >
           </p>
           <p data-i18n="s2InfoDesc">
-            AI (Claude Vision) автоматично розпізнає імена та місця гравців
+            Tesseract.js локально розпізнає імена та місця гравців
           </p>
           <p class="ok">
             <strong>💡</strong>
@@ -339,10 +341,10 @@
             <button
               class="btn btn-primary"
               id="analyzeBtn"
-              onclick="analyzeWithAI()"
+              onclick="analyzeWithOCR()"
               data-i18n="btnAnalyzeAI"
             >
-              🤖 Розпізнати місця через AI
+              🔎 Розпізнати місця через OCR
             </button>
             <button
               class="btn btn-secondary"
@@ -354,7 +356,7 @@
           </div>
         </div>
 
-        <!-- AI processing status -->
+        <!-- OCR processing status -->
         <div id="aiProcessing" class="hidden" style="margin-top: 18px">
           <div
             style="
@@ -369,7 +371,7 @@
               id="aiStatusText"
               style="color: var(--muted); font-size: 0.9em"
               data-i18n="aiStatusSending"
-              >Надсилаємо зображення до Claude Vision...</span
+              >Готуємо локальний OCR-движок...</span
             >
           </div>
           <div class="progress-bar">

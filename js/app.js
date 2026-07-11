@@ -55,16 +55,16 @@ const i18n = {
     s2Title: "Завантаження результатів (зображення)",
     s2InfoTitle: "📸 Завантажте зображення з результатами турніру",
     s2InfoDesc:
-      "AI (Claude Vision) автоматично розпізнає імена та місця гравців",
-    s2InfoTip: "Якщо AI не впевнений — місце можна виправити вручну на кроці 3",
+      "Tesseract.js локально розпізнає імена та місця гравців без завантаження фото в хмару",
+    s2InfoTip: "Якщо OCR не впевнений — місце можна виправити вручну на кроці 3",
     uploadTitle: "Натисніть або перетягніть зображення сюди",
     uploadFormats: "JPG, PNG, GIF, WebP",
     imagePreviewTitle: "🖼️ Завантажене зображення:",
-    btnAnalyzeAI: "🤖 Розпізнати місця через AI",
+    btnAnalyzeAI: "🔎 Розпізнати місця через OCR",
     btnSkipAI: "⏭️ Пропустити (вручну)",
-    aiStatusSending: "Надсилаємо зображення до Claude Vision...",
-    aiStatusAnalyzing: "Claude Vision аналізує зображення...",
-    aiStatusProcessing: "Обробляємо відповідь...",
+    aiStatusSending: "Готуємо локальний OCR-движок...",
+    aiStatusAnalyzing: "Tesseract.js розпізнає текст на зображенні...",
+    aiStatusProcessing: "Зіставляємо імена та місця...",
     detectedTitle: "🔍 Розпізнані місця:",
     detectedCheckTitle: "⚠️ Перевірте результати перед переходом до кроку 3",
     detectedCheckDesc:
@@ -98,8 +98,12 @@ const i18n = {
     importedCount: (n) => `✅ Імпортовано ${n} гравців!`,
     importEmpty: "❌ Введіть дані для імпорту!",
     importFailed: "❌ Не вдалося розпізнати гравців. Перевірте формат даних!",
-    aiError: (msg) => "❌ Помилка AI: " + msg,
+    aiError: (msg) => "❌ Помилка OCR: " + msg,
     aiParseError: "Не вдалося розібрати відповідь AI. Спробуйте ще раз.",
+    ocrHttpRequired:
+      "Відкрийте застосунок через HTTP/HTTPS, а не напряму як file://. Для локального запуску використайте вебсервер.",
+    ocrAssetsMissing:
+      "Не вдалося завантажити локальні файли OCR. Перевірте папку vendor та шляхи GitHub Pages.",
     detectedCount: (h, t, p) => `Розпізнано: ${h}/${t} (${p}%)`,
     confHigh: "✅ Впевнено",
     confMid: "⚠️ Частково",
@@ -212,17 +216,17 @@ const i18n = {
     s2Title: "Upload Results (Image)",
     s2InfoTitle: "📸 Upload tournament results image",
     s2InfoDesc:
-      "AI (Claude Vision) will automatically detect player names and places",
+      "Tesseract.js detects player names and places locally without uploading the image to the cloud",
     s2InfoTip:
-      "If AI is not confident — you can correct places manually in step 3",
+      "If OCR is not confident — you can correct places manually in step 3",
     uploadTitle: "Click or drag image here",
     uploadFormats: "JPG, PNG, GIF, WebP",
     imagePreviewTitle: "🖼️ Uploaded image:",
-    btnAnalyzeAI: "🤖 Detect Places with AI",
+    btnAnalyzeAI: "🔎 Detect Places with OCR",
     btnSkipAI: "⏭️ Skip (manual)",
-    aiStatusSending: "Sending image to Claude Vision...",
-    aiStatusAnalyzing: "Claude Vision is analyzing the image...",
-    aiStatusProcessing: "Processing response...",
+    aiStatusSending: "Preparing the local OCR engine...",
+    aiStatusAnalyzing: "Tesseract.js is recognizing text in the image...",
+    aiStatusProcessing: "Matching names and places...",
     detectedTitle: "🔍 Detected places:",
     detectedCheckTitle: "⚠️ Review results before going to step 3",
     detectedCheckDesc:
@@ -255,8 +259,12 @@ const i18n = {
     importedCount: (n) => `✅ Imported ${n} players!`,
     importEmpty: "❌ Please enter data to import!",
     importFailed: "❌ Could not parse players. Check the data format!",
-    aiError: (msg) => "❌ AI error: " + msg,
+    aiError: (msg) => "❌ OCR error: " + msg,
     aiParseError: "Failed to parse AI response. Please try again.",
+    ocrHttpRequired:
+      "Open the application through HTTP/HTTPS, not directly as file://. Use a web server for local development.",
+    ocrAssetsMissing:
+      "Could not load the local OCR files. Check the vendor directory and GitHub Pages paths.",
     detectedCount: (h, t, p) => `Detected: ${h}/${t} (${p}%)`,
     confHigh: "✅ Confident",
     confMid: "⚠️ Partial",
@@ -821,13 +829,13 @@ function removeImage() {
 }
 
 function skipAI() {
-  // No image AI — go straight to step 3 with no pre-filled places
+  // No image OCR — go straight to step 3 with no pre-filled places
   detectedPlayersFromImage = [];
   goToStep3();
 }
 
-/* ─── CLAUDE VISION AI ─── */
-async function analyzeWithAI() {
+/* ─── LOCAL TESSERACT OCR ─── */
+async function analyzeWithOCR() {
   if (!uploadedImageData) return;
 
   const btn = document.getElementById("analyzeBtn");
@@ -836,132 +844,62 @@ async function analyzeWithAI() {
   document.getElementById("detectedResults").classList.add("hidden");
   document.getElementById("aiError").classList.add("hidden");
 
-  // Animate progress bar while waiting
   const fill = document.getElementById("progressFill");
   const statusText = document.getElementById("aiStatusText");
-  fill.style.width = "0%";
-  let fakeProgress = 0;
-  const progInterval = setInterval(() => {
-    if (fakeProgress < 85) {
-      fakeProgress += Math.random() * 8;
-      fill.style.width = Math.min(fakeProgress, 85) + "%";
-    }
-  }, 400);
-
-  // Build player list for prompt
-  const playerNames = players.map((p) => {
-    const nick = Object.entries(nicknameMappings).find(
-      ([n, r]) => r === p.name,
-    );
-    return nick ? `${p.name} (нікнейм: ${nick[0]})` : p.name;
-  });
-
-  const groupCount = parseInt(document.getElementById("groupCount").value, 10);
-  const count = parseInt(document.getElementById("playerCount").value, 10);
-
-  // Valid place keys depending on tournament config
-  let validPlaces = "";
-  if (groupCount === 1) {
-    validPlaces = `"winner" (1 місце), "finalist" (2 місце), "semi" (3 місце), "quarter" (4 місце), "eighth" (5 місце), "sixteenth" (6 місце)`;
-  } else if (groupCount <= 3) {
-    validPlaces = `"winner" (переможець), "finalist" (фіналіст), "semi" (1-е місце групи/півфіналіст), "quarter" (2-3 місця груп / 1/4 фіналу), "group3" (3-є місце групи), "group4" (4-е місце групи), "group5" (5-е місце групи)`;
-  } else {
-    validPlaces = `"winner" (переможець), "finalist" (фіналіст), "quarter" (1-е місце групи / 1/4 фіналу), "eighth" (2-3 місця груп / 1/8 фіналу), "group3" (3-є місце групи), "group4" (4-е місце групи), "group5" (5-е місце групи)`;
-  }
-
-  const prompt = `Ти — асистент для розпізнавання результатів турніру з дартсу.
-
-На зображенні — таблиця результатів турніру з дартсу.
-
-Список зареєстрованих гравців (${players.length} осіб):
-${playerNames.map((n, i) => `${i + 1}. ${n}`).join("\n")}
-
-Кількість учасників: ${count}, груп: ${groupCount}.
-
-Допустимі значення місць:
-${validPlaces}
-
-Твоє завдання:
-1. Знайди кожного гравця зі списку на зображенні (або за прізвищем, або за нікнеймом).
-2. Визнач його місце у турнірі.
-3. Для кожного гравця вкажи confidence: "high" (впевнений), "mid" (частково), "low" (не знайдений).
-
-Відповідай ТІЛЬКИ у форматі JSON (без markdown, без пояснень):
-{
-  "results": [
-    {"name": "Повне ім'я гравця зі списку", "detectedAs": "як знайдено на фото", "place": "ключ місця", "confidence": "high|mid|low"},
-    ...
-  ]
-}
-
-Якщо гравця не видно на зображенні — вкажи place: "" і confidence: "low".`;
+  fill.style.width = "2%";
+  statusText.textContent = t("aiStatusSending");
+  let shownProgress = 2;
 
   try {
-    statusText.textContent = t("aiStatusAnalyzing");
-    const base64 = uploadedImageData.split(",")[1];
-    const mime = uploadedImageMime || "image/jpeg";
+    if (!window.DartsOCR?.analyze) {
+      throw new Error("Tesseract.js module is unavailable.");
+    }
 
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [
-          {
-            role: "user",
-            content: [
-              {
-                type: "image",
-                source: { type: "base64", media_type: mime, data: base64 },
-              },
-              { type: "text", text: prompt },
-            ],
-          },
-        ],
-      }),
+    const analysis = await window.DartsOCR.analyze({
+      imageData: uploadedImageData,
+      players,
+      nicknameMappings,
+      tournamentType: document.getElementById("tournamentType").value,
+      playerCount: parseInt(document.getElementById("playerCount").value, 10),
+      groupCount: parseInt(document.getElementById("groupCount").value, 10),
+      onProgress({ phase, progress }) {
+        const target =
+          phase === "recognizing" ? 30 + progress * 65 : 3 + progress * 27;
+        shownProgress = Math.max(shownProgress, Math.min(95, target));
+        fill.style.width = shownProgress + "%";
+        statusText.textContent =
+          phase === "recognizing"
+            ? t("aiStatusAnalyzing")
+            : t("aiStatusSending");
+      },
     });
 
-    clearInterval(progInterval);
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error?.message || `HTTP ${response.status}`);
-    }
-
-    fill.style.width = "95%";
+    fill.style.width = "98%";
     statusText.textContent = t("aiStatusProcessing");
-
-    const data = await response.json();
-    const rawText = data.content?.map((c) => c.text || "").join("") || "";
-
-    // Parse JSON from response
-    let parsed;
-    try {
-      const cleaned = rawText.replace(/```json|```/g, "").trim();
-      parsed = JSON.parse(cleaned);
-    } catch {
-      throw new Error(t("aiParseError"));
-    }
-
     fill.style.width = "100%";
     setTimeout(() => {
       document.getElementById("aiProcessing").classList.add("hidden");
       btn.disabled = false;
-      renderAIResults(parsed.results || []);
+      renderAIResults(analysis.results || []);
     }, 300);
   } catch (err) {
-    clearInterval(progInterval);
     document.getElementById("aiProcessing").classList.add("hidden");
     fill.style.width = "0%";
     btn.disabled = false;
     const errEl = document.getElementById("aiError");
-    errEl.textContent = t("aiError", err.message);
+    const message =
+      err.code === "FILE_PROTOCOL"
+        ? t("ocrHttpRequired")
+        : err.code === "ASSET_FETCH_FAILED"
+          ? t("ocrAssetsMissing")
+          : err.message;
+    errEl.textContent = t("aiError", message);
     errEl.classList.remove("hidden");
   }
 }
 
 function renderAIResults(results) {
+  const safeResults = Array.isArray(results) ? results : [];
   detectedPlayersFromImage = [];
   const list = document.getElementById("detectedList");
   list.innerHTML = "";
@@ -978,19 +916,15 @@ function renderAIResults(results) {
     group5: t("placeGroup", 5),
   };
 
-  let highCount = 0,
-    totalCount = results.length;
+  let highCount = 0;
+  const totalCount = players.length;
 
   players.forEach((player) => {
-    const aiResult = results.find(
-      (r) =>
-        r.name === player.name ||
-        r.name
-          ?.toLowerCase()
-          .includes(player.name.split(" ")[0].toLowerCase()) ||
-        player.name
-          ?.toLowerCase()
-          .includes((r.name || "").split(" ")[0].toLowerCase()),
+    const playerName = player.name.trim().toLocaleLowerCase("uk-UA");
+    const aiResult = safeResults.find(
+      (result) =>
+        typeof result?.name === "string" &&
+        result.name.trim().toLocaleLowerCase("uk-UA") === playerName,
     );
 
     const place = aiResult?.place || "";
@@ -1014,11 +948,25 @@ function renderAIResults(results) {
 
     const row = document.createElement("div");
     row.className = "detected-row";
-    row.innerHTML = `
-                <div><strong>${player.name}</strong></div>
-                <div style="color:var(--muted);font-size:0.88em">${detectedAs}</div>
-                <div>${place ? placeLabels[place] || place : `<span style="color:var(--muted)">${t("notDefined")}</span>`}</div>
-                <div style="${confStyle};font-size:0.88em">${confLabel}</div>`;
+    const nameCell = document.createElement("div");
+    const strong = document.createElement("strong");
+    strong.textContent = player.name;
+    nameCell.appendChild(strong);
+
+    const detectedCell = document.createElement("div");
+    detectedCell.style.color = "var(--muted)";
+    detectedCell.style.fontSize = "0.88em";
+    detectedCell.textContent = detectedAs;
+
+    const placeCell = document.createElement("div");
+    placeCell.textContent = place ? placeLabels[place] || place : t("notDefined");
+    if (!place) placeCell.style.color = "var(--muted)";
+
+    const confidenceCell = document.createElement("div");
+    confidenceCell.style.cssText = `${confStyle};font-size:0.88em`;
+    confidenceCell.textContent = confLabel;
+
+    row.append(nameCell, detectedCell, placeCell, confidenceCell);
     list.appendChild(row);
 
     detectedPlayersFromImage.push({
