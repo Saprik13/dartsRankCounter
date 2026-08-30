@@ -1,0 +1,7 @@
+{
+  "name": "darts-rank-counter",
+  "private": true,
+  "scripts": {
+    "test": "node --check js/app.js"
+  }
+}

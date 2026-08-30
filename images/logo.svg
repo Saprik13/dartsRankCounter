@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-labelledby="title">
+  <title id="title">Darts Rank Counter</title>
+  <circle cx="24" cy="24" r="22" fill="#0a84ff" opacity="0.15"/>
+  <circle cx="24" cy="24" r="16" fill="none" stroke="#0a84ff" stroke-width="2"/>
+  <circle cx="24" cy="24" r="9" fill="none" stroke="#0a84ff" stroke-width="2"/>
+  <circle cx="24" cy="24" r="3.5" fill="#0a84ff"/>
+  <path d="M24 2v12M46 24H34M24 46V34M2 24h12" fill="none" stroke="#0a84ff" stroke-width="2" stroke-linecap="round"/>
+</svg>

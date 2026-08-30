@@ -1,0 +1,180 @@
+/* Responsive layout aligned with the Randomizer project's mobile rhythm. */
+
+@media (max-width: 820px) {
+    .topbar {
+        width: 100%;
+        padding: 1rem 0.75rem 0.75rem;
+    }
+
+    .topbar-logo { gap: 0; }
+    .brand-mark { width: 34px; height: 34px; flex-basis: 34px; }
+    .topbar-logo h1 { font-size: 26px; line-height: 31px; }
+    .topbar-logo p { font-size: 10px; }
+
+    .main { padding: 12px 12px 32px; }
+
+    .steps-nav { margin-bottom: 22px; }
+    .step-dot .dot-label { font-size: 0.62em; }
+
+    .card { padding: 14px; }
+    .card-header { align-items: center; margin-bottom: 10px; }
+    .card-title { font-size: 11px; line-height: 24px; }
+
+    .grid-2,
+    .grid-3,
+    .type-cards { grid-template-columns: minmax(0, 1fr); }
+
+    .type-card { min-height: 92px; }
+
+    input,
+    select,
+    textarea { font-size: 16px; }
+
+    .btn {
+        min-height: 44px;
+        height: auto;
+        padding: 10px 14px;
+        white-space: normal;
+    }
+
+    .btn-sm {
+        min-height: 40px;
+        padding: 8px 12px;
+    }
+
+    .import-actions,
+    .manual-actions,
+    .mapping-actions,
+    .button-row.next-action { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .result-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .button-row .btn { width: 100%; }
+
+    .mapping-row {
+        grid-template-columns: minmax(0, 1fr) 40px;
+        gap: 8px;
+    }
+    .mapping-row .mapping-real { grid-column: 1; }
+    .mapping-row .remove-btn {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: center;
+        width: 40px;
+        height: 40px;
+    }
+
+    .player-table-header,
+    .player-row-item {
+        grid-template-columns: minmax(0, 1fr) 80px 40px;
+        gap: 8px;
+        padding-inline: 10px;
+    }
+    .player-row-item .remove-btn {
+        width: 40px;
+        height: 40px;
+    }
+
+    .place-header { display: none; }
+    .place-row {
+        grid-template-columns: minmax(0, 1fr) minmax(100px, 0.8fr);
+        gap: 12px 16px;
+        padding: 14px;
+        border-top: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        margin-bottom: 10px;
+    }
+    .place-row > div {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .place-row > div::before {
+        content: attr(data-label);
+        color: var(--text);
+        font-size: 0.68em;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .place-row .pname { grid-column: 1 / -1; }
+    .place-row select { min-width: 0; }
+
+    .table-scroll {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+    }
+}
+
+@media (max-width: 560px) {
+    .table-scroll {
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .result-table,
+    .result-table tbody { display: block; width: 100%; }
+    .result-table colgroup,
+    .result-table thead { display: none; }
+    .result-table tbody {
+        display: grid;
+        gap: 10px;
+    }
+    .result-table tbody tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--surface);
+    }
+    .result-table td,
+    .result-table tbody th {
+        display: flex;
+        min-width: 0;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 4px;
+        padding: 9px 10px;
+        border-bottom: 1px solid var(--border);
+        font-size: 13px;
+        text-align: left;
+    }
+    .result-table :is(td,th)::before {
+        content: attr(data-label);
+        color: var(--text);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .result-table .badge { width: 100%; }
+}
+
+@media (max-width: 420px) {
+    .topbar { padding: 0.75rem 0.5rem 0.5rem; }
+    .topbar-logo h1 { min-height: 28px; font-size: 22px; line-height: 28px; }
+    .topbar-logo p { display: inline-block; width: 190px; }
+    .lang-switcher { top: 0.75rem; right: 0.5rem; }
+    .main { padding-inline: 8px; }
+    .card { padding: 12px; }
+
+    .mapping-section,
+    .scheme-box { padding-inline: 12px; }
+
+    .place-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    .place-row .pname { grid-column: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+    }
+}
