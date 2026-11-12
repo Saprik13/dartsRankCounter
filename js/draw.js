@@ -159,8 +159,6 @@ const drawCore = (function(){
 
     function groupSchedule(size){ return SCHEDULES[size] || circleSchedule(size); }
 
-    function nextPowerOfTwo(n){ let p = 2; while(p < n) p *= 2; return p; }
-
     function randomTpid(used){
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let id;
@@ -169,12 +167,12 @@ const drawCore = (function(){
         return id;
     }
 
-    // Settings copied from "Lutsk Pub Darts 05.11.2026" (groups: 501, best of 3 legs;
-    // playoff best of 3, semi-final and final best of 5).
+    // Settings as on "Lutsk Pub Darts 12.11.2026": 501, 15-round limit, groups best of 3 legs;
+    // playoff best of 3, semi-final and final best of 5.
     const RR_SETTING = {
         round_robin:1, show_order:1, include_leg:0, limit:1, low_win:0, limit_leg_count:2, drawMode:0,
         limit_set_count:2, limit_set_leg_count:2, startScore:501, match_type:'01', limit_rounds:1, overkill:0,
-        rounds:13, changeFirst:0, exitResult:0, autoNext:1, setOrder:0, schedule:[], point:0, point_w:2,
+        rounds:15, changeFirst:0, exitResult:0, autoNext:1, setOrder:0, schedule:[], point:0, point_w:2,
         point_d:1, point_l:0, include_set:0, include_set_leg:0, priority_win:0, exclude_from_stats:0, game_setting:[]
     };
     const T_SETTING = {
@@ -185,7 +183,7 @@ const drawCore = (function(){
             { round:-1, limit:1, match_type:'01', roundLimit:0, maxRound:15, overkill:0, limit_leg_count:3 }
         ],
         changeFirst:0, exitResult:1, autoNext:1, setOrder:0, schedule:[], startScore:501, match_type:'01',
-        limit_rounds:1, overkill:0, rounds:13, exclude_from_stats:0
+        limit_rounds:1, overkill:0, rounds:15, exclude_from_stats:0
     };
 
     function dayMonthYear(isoDate){
@@ -224,9 +222,8 @@ const drawCore = (function(){
             rr_order[String(size)] = groupSchedule(size).map(([a, b]) => [a - 1, b - 1]);
         });
         const withPlayoff = groups.length > 1;
-        // Everyone except the last of each group goes to the playoff (as on 22.10–05.11).
-        const advancing = groups.reduce((sum, g) => sum + Math.max(1, g.length - 1), 0);
-        const bracketSize = Math.max(4, nextPowerOfTwo(advancing));
+        // The club always plays a top-8 playoff; the admin fills it by hand after the groups.
+        const bracketSize = 8;
         const t_table = [];
         for(let n = bracketSize; n >= 1; n /= 2) t_table.push(Array(n).fill(''));
         return {
@@ -295,7 +292,7 @@ if(typeof document !== 'undefined') (function(){
         drawSelectLabel:(name,rating)=>`${name}, рейтинг ${rating}`,
         drawOrderTitle:'Порядок ігор',
         drawExportTitle:'Турнір для n01',
-        drawExportHint:'Файл містить гравців, групи й порядок ігор (порядок ігор також дублюється в описі турніру). Налаштування матчів як 05.11: 501, до 2 легів, півфінал і фінал до 3. Плей-оф порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
+        drawExportHint:'Файл містить гравців, групи й порядок ігор (порядок ігор також дублюється в описі турніру). Налаштування: 501, ліміт 15 раундів, у групах до 2 легів, півфінал і фінал до 3. Плей-оф на 8 гравців порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
         btnDrawJson:'Завантажити JSON для n01',
         drawJsonSaved:name=>`Файл ${name} збережено.`,
     });
@@ -333,7 +330,7 @@ if(typeof document !== 'undefined') (function(){
         drawSelectLabel:(name,rating)=>`${name}, rating ${rating}`,
         drawOrderTitle:'Match order',
         drawExportTitle:'Tournament for n01',
-        drawExportHint:'The file holds players, groups and match order (the match order is also copied into the tournament description). Match settings as on 05.11: 501, best of 3 legs, semi-final and final best of 5. The playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
+        drawExportHint:'The file holds players, groups and match order (the match order is also copied into the tournament description). Settings: 501, 15-round limit, groups best of 3 legs, semi-final and final best of 5. The top-8 playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
         btnDrawJson:'Download JSON for n01',
         drawJsonSaved:name=>`Saved ${name}.`,
     });
