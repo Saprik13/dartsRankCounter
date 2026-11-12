@@ -73,3 +73,27 @@ const tp = new Set(json.entry_list.map(e => e.tpid));
 assert.strictEqual(tp.size, 11);
 json.rr_seq.flat(2).forEach(id => assert.ok(tp.has(id)));
 console.log('n01 export tests passed');
+
+// Pot draw: each group gets exactly one player from every full pot, sizes differ by ≤1,
+// players inside a group stay ordered by rating, and the draw is random.
+let seed = 7;
+const rng = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+for(const [n, g] of [[12,3],[11,3],[8,2],[19,4],[5,1]]){
+    for(let run = 0; run < 20; run++){
+        const groups = draw.drawByPots(ranks(n).reverse(), g, rng);
+        const sizes = groups.map(x => x.length);
+        assert.ok(Math.max(...sizes) - Math.min(...sizes) <= 1, `sizes ${sizes}`);
+        assert.strictEqual(sizes.reduce((a, b) => a + b), n);
+        groups.forEach(members => {
+            members.forEach((p, i) => {
+                assert.strictEqual(p.pot, Math.floor((Number(p.name.slice(1)) - 1) / g) + 1, 'pot = block of g by rating');
+                if(i) assert.ok(members[i - 1].rating >= p.rating, 'ordered by rating');
+            });
+            assert.strictEqual(new Set(members.map(p => p.pot)).size, members.length, 'one per pot');
+        });
+    }
+}
+const firstGroups = new Set();
+for(let run = 0; run < 50; run++) firstGroups.add(draw.drawByPots(ranks(12), 3, rng).findIndex(m => m.some(p => p.name === 'P1')));
+assert.strictEqual(firstGroups.size, 3, 'top seed lands in any group');
+console.log('pot draw tests passed');

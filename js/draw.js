@@ -75,6 +75,25 @@ const drawCore = (function(){
         return groups;
     }
 
+    // Pot draw: sort by rating, cut into pots of `groupCount` players (pot 1 = the strongest),
+    // then deal every pot to the groups in random order. Each group gets one player per pot,
+    // the last (smaller) pot goes to random distinct groups, so sizes differ by at most one.
+    // Inside a group players stay ordered by rating, which is the seed used by the match order.
+    function drawByPots(players, groupCount, random = Math.random){
+        if(!Number.isInteger(groupCount) || groupCount < 1) return [];
+        const sorted = sortByRating(players);
+        const groups = Array.from({ length: groupCount }, () => []);
+        for(let start = 0, pot = 1; start < sorted.length; start += groupCount, pot++){
+            const order = Array.from({ length: groupCount }, (_, i) => i);
+            for(let i = order.length - 1; i > 0; i--){
+                const j = Math.floor(random() * (i + 1));
+                [order[i], order[j]] = [order[j], order[i]];
+            }
+            sorted.slice(start, start + groupCount).forEach((player, k) => groups[order[k]].push({ ...player, pot }));
+        }
+        return groups;
+    }
+
     // Same rule the calculator uses for the minimum number of groups (≤5 per group).
     function suggestedGroupCount(playerCount){
         return Math.max(1, Math.ceil(playerCount / 5));
@@ -227,7 +246,7 @@ const drawCore = (function(){
         };
     }
 
-    return { groupCapacities, serpentineTargets, variantCount, seedPlayersSerpentine, suggestedGroupCount, average, n01Names, formatGroups,
+    return { groupCapacities, serpentineTargets, variantCount, seedPlayersSerpentine, drawByPots, suggestedGroupCount, average, n01Names, formatGroups,
         groupSchedule, scheduleText, buildN01Tournament };
 })();
 
@@ -240,8 +259,6 @@ if(typeof document !== 'undefined') (function(){
     const $ = id => document.getElementById(id);
     let pool = [];             // [{ name, rating, guest }]
     let selected = new Set();  // names
-    let variant = 0;
-    let lastKey = '';
     let lastGroups = null;
 
     Object.assign(i18n.uk, {
@@ -249,7 +266,7 @@ if(typeof document !== 'undefined') (function(){
         viewRating:'Рейтинг',
         viewDraw:'Жеребкування',
         drawTitle:'Жеребкування груп',
-        drawHint:'Відмітьте, хто грає сьогодні. Гравці розподіляються «змійкою» за рейтингом із таблиці: найсильніший завжди в групі 1, групи відрізняються максимум на одного гравця. «Інший варіант» міняє місцями сусідніх за рейтингом гравців, тож баланс зберігається.',
+        drawHint:'Відмітьте, хто грає сьогодні. Гравці сортуються за рейтингом із таблиці й діляться на кошики (у кошику стільки гравців, скільки груп; кошик 1 — найсильніші). З кожного кошика гравці випадково розходяться по групах, по одному в кожну. «Пережеребкувати» робить новий випадковий розподіл.',
         btnDrawLoad:'Завантажити гравців з таблиці',
         drawPlayersTitle:'Хто грає сьогодні',
         drawSearchLabel:'Пошук гравця',
@@ -259,13 +276,13 @@ if(typeof document !== 'undefined') (function(){
         drawGuestTag:'новий',
         btnDrawGenerate:'Жеребкувати',
         drawResultTitle:'Групи',
-        btnDrawRepeat:'Інший варіант',
+        btnDrawRepeat:'Пережеребкувати',
         btnDrawCopy:'Копіювати для n01',
         btnDrawToRating:'Перенести в розрахунок',
         drawGroup:'Група',
         drawAvg:'Ø',
         drawAvgLabel:'Середній рейтинг',
-        drawVariant:(k,n)=>`варіант ${k} з ${n}`,
+        drawPot:n=>`К${n}`,
         drawInfo:(n,g,sizes)=>`Гравців: ${n}. Груп: ${g}. У групах: ${sizes}.`,
         drawNeedTwo:'Відмітьте хоча б 2 гравців.',
         drawTooManyGroups:(g,n)=>`Груп (${g}) більше, ніж гравців (${n}).`,
@@ -287,7 +304,7 @@ if(typeof document !== 'undefined') (function(){
         viewRating:'Rating',
         viewDraw:'Group draw',
         drawTitle:'Group draw',
-        drawHint:'Tick who is playing tonight. Players are seeded serpentine-style by their sheet rating: the strongest is always in group 1 and group sizes differ by at most one. “Another variant” swaps neighbouring ratings, so balance is kept.',
+        drawHint:'Tick who is playing tonight. Players are sorted by sheet rating and cut into pots (one player per group in each pot; pot 1 is the strongest). Each pot is drawn into the groups at random, one player per group. “Redraw” makes a new random draw.',
         btnDrawLoad:'Load players from sheet',
         drawPlayersTitle:'Playing tonight',
         drawSearchLabel:'Find player',
@@ -297,13 +314,13 @@ if(typeof document !== 'undefined') (function(){
         drawGuestTag:'new',
         btnDrawGenerate:'Draw groups',
         drawResultTitle:'Groups',
-        btnDrawRepeat:'Another variant',
+        btnDrawRepeat:'Redraw',
         btnDrawCopy:'Copy for n01',
         btnDrawToRating:'Send to calculator',
         drawGroup:'Group',
         drawAvg:'Avg',
         drawAvgLabel:'Average rating',
-        drawVariant:(k,n)=>`variant ${k} of ${n}`,
+        drawPot:n=>`P${n}`,
         drawInfo:(n,g,sizes)=>`Players: ${n}. Groups: ${g}. Group sizes: ${sizes}.`,
         drawNeedTwo:'Tick at least 2 players.',
         drawTooManyGroups:(g,n)=>`More groups (${g}) than players (${n}).`,
@@ -480,10 +497,7 @@ if(typeof document !== 'undefined') (function(){
             error.focus();
             return;
         }
-        const key = JSON.stringify([g, list.map(p => [p.name, p.rating])]);
-        if(key !== lastKey){ lastKey = key; variant = 0; }
-        else if(reroll) variant = (variant + 1) % drawCore.variantCount(list.length, g);
-        lastGroups = drawCore.seedPlayersSerpentine(list, g, variant);
+        lastGroups = drawCore.drawByPots(list, g);
         renderGroups(lastGroups, list.length);
         setHidden($('drawCopyStatus'), true);
         announce(t('drawReady', g));
@@ -491,7 +505,6 @@ if(typeof document !== 'undefined') (function(){
 
     function renderGroups(groups, total){
         const names = drawCore.n01Names(groups.flat(), dartsSheets.aliasList());
-        const ranked = groups.flat().sort((a, b) => b.rating - a.rating);
         const cards = groups.map((members, i) => {
             const card = document.createElement('article');
             card.className = 'draw-group';
@@ -505,9 +518,8 @@ if(typeof document !== 'undefined') (function(){
             const list = document.createElement('ol');
             list.className = 'draw-members';
             members.forEach(member => {
-                const tier = Math.min(3, Math.floor(ranked.indexOf(member) / ranked.length * 4));
                 const item = document.createElement('li');
-                item.className = 'draw-member draw-tier-' + (tier + 1);
+                item.className = 'draw-member draw-tier-' + Math.min(4, member.pot || 4);
                 const name = document.createElement('span');
                 name.className = 'draw-member-name';
                 name.textContent = member.name;
@@ -521,7 +533,10 @@ if(typeof document !== 'undefined') (function(){
                 const rating = document.createElement('span');
                 rating.className = 'draw-member-rating';
                 rating.textContent = fmt(member.rating);
-                item.append(name, rating);
+                const pot = document.createElement('span');
+                pot.className = 'draw-member-pot';
+                pot.textContent = t('drawPot', member.pot);
+                item.append(name, pot, rating);
                 list.append(item);
             });
             const avg = document.createElement('p');
@@ -544,7 +559,6 @@ if(typeof document !== 'undefined') (function(){
             return card;
         });
         $('drawGroups').replaceChildren(...cards);
-        $('drawVariant').textContent = t('drawVariant', variant + 1, drawCore.variantCount(total, groups.length));
         setHidden($('drawResult'), false);
         $('draw-result-heading').focus();
     }
