@@ -79,6 +79,10 @@ assert.strictEqual(json.t_setting.rounds, 15);
 const tp = new Set(json.entry_list.map(e => e.tpid));
 assert.strictEqual(tp.size, 11);
 json.rr_seq.flat(2).forEach(id => assert.ok(tp.has(id)));
+// Same player → same tpid on every export, so re-importing doesn't create new players in n01.
+const again = draw.buildN01Tournament(draw.seedPlayersSerpentine(ranks(11), 4), shortNames, { date:'2026-11-12' });
+const idOf = j => Object.fromEntries(j.entry_list.map(e => [e.name, e.tpid]));
+assert.deepStrictEqual(idOf(again), idOf(json));
 console.log('n01 export tests passed');
 
 // Pot draw: each group gets exactly one player from every full pot, sizes differ by ≤1,
