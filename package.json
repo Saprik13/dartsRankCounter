@@ -2,6 +2,6 @@
   "name": "darts-rank-counter",
   "private": true,
   "scripts": {
-    "test": "node --check js/app.js && node --check js/sheets.js && node --check js/n01.js && node tests/n01.test.js"
+    "test": "node --check js/app.js && node --check js/sheets.js && node --check js/n01.js && node --check js/draw.js && node tests/n01.test.js && node tests/draw.test.js"
   }
 }

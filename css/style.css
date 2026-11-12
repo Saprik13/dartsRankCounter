@@ -660,3 +660,59 @@ select.place-select{
     .n01-pick{ grid-column:1 / -1; }
     .n01-how{ display:none; }
 }
+
+/* ── GROUP DRAW ── */
+.view-tabs{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; margin-bottom:20px; }
+.view-tabs .tab-btn{ justify-content:center; min-height:40px; }
+.draw-load-row{ margin-bottom:12px; }
+.draw-tools{ display:flex; align-items:center; gap:8px; margin:0 0 10px; }
+.draw-tools .form-group{ flex:1 1 auto; margin-bottom:0; }
+.draw-player-list{
+    list-style:none; margin:0 0 12px; padding:0;
+    max-height:360px; overflow-y:auto;
+    border:1px solid var(--border); border-radius:var(--radius-md);
+}
+.draw-player + .draw-player{ border-top:1px solid var(--border); }
+.draw-player label{
+    display:grid; grid-template-columns:22px minmax(0,1fr) auto; align-items:center; gap:10px;
+    padding:9px 12px; cursor:pointer;
+}
+.draw-player input[type=checkbox]{ width:18px; height:18px; min-height:0; padding:0; accent-color:var(--accent); }
+.draw-player.is-selected{ background:rgba(10,132,255,0.10); }
+.draw-player:hover{ background:var(--surface2); }
+.draw-player-name{ font-size:13px; font-weight:600; overflow-wrap:anywhere; }
+.draw-player-rating{ color:var(--accent); font-size:13px; font-weight:700; }
+.draw-guest-tag{
+    display:inline-block; padding:1px 6px; border-radius:999px;
+    background:rgba(255,159,10,0.15); color:var(--orange); font-size:10px; font-weight:700;
+}
+.draw-settings{ display:flex; align-items:flex-end; flex-wrap:wrap; gap:12px; margin-bottom:12px; }
+.draw-settings .form-group{ flex:0 0 160px; margin-bottom:0; }
+.draw-info{ flex:1 1 200px; margin:0 0 10px; color:var(--text2); font-size:12px; }
+#drawResult{ margin-top:20px; }
+.draw-variant{ margin-inline-start:auto; color:var(--text2); font-size:11px; font-weight:500; }
+.draw-groups{ display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; margin-bottom:14px; }
+.draw-group{ background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-md); padding:10px 12px; }
+.draw-group-title{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; font-size:13px; }
+.draw-members{ list-style:none; margin:0; padding:0; }
+.draw-member{
+    display:flex; justify-content:space-between; gap:8px; padding:5px 0 5px 8px;
+    border-left:3px solid var(--border2); font-size:13px;
+}
+.draw-member + .draw-member{ margin-top:4px; }
+.draw-tier-1{ border-left-color:var(--orange); }
+.draw-tier-2{ border-left-color:var(--green); }
+.draw-tier-3{ border-left-color:var(--accent); }
+.draw-member-name{ display:grid; min-width:0; font-weight:600; overflow-wrap:anywhere; }
+.draw-member-nick{ color:var(--text2); font-size:11px; font-weight:500; }
+.draw-member-rating{ color:var(--accent); font-weight:700; }
+.draw-avg{ margin-top:8px; padding-top:6px; border-top:1px solid var(--border); color:var(--text2); font-size:12px; text-align:right; }
+.draw-actions{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.draw-actions .btn{ width:100%; }
+#drawCopyStatus{ margin-top:12px; white-space:pre-wrap; text-align:left; }
+@media (max-width: 640px){
+    .draw-actions{ grid-template-columns:minmax(0,1fr); }
+}
+.draw-player label,
+.draw-variant{ text-transform:none; letter-spacing:normal; }
+.draw-player label{ margin:0; color:var(--text); }

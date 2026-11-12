@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="./images/logo.svg">
 <link rel="alternate icon" type="image/x-icon" href="./favicon.ico">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-<link rel="stylesheet" href="./css/style.css?v=18">
+<link rel="stylesheet" href="./css/style.css?v=19">
 <link rel="stylesheet" href="./css/responsive.css?v=5">
 </head>
 <body>
@@ -28,6 +28,102 @@
 </header>
 
 <main class="main" id="main-content" tabindex="-1" aria-labelledby="app-title">
+    <!-- VIEW SWITCH -->
+    <div class="tab-row view-tabs" role="tablist" data-i18n-aria-label="viewTabsLabel" aria-label="Розділ">
+        <button type="button" class="tab-btn active" id="viewRatingTab" role="tab" aria-selected="true" aria-controls="ratingView" tabindex="0" data-view-tab>
+            <i class="ti ti-calculator" aria-hidden="true"></i>
+            <span data-i18n="viewRating">Рейтинг</span>
+        </button>
+        <button type="button" class="tab-btn" id="viewDrawTab" role="tab" aria-selected="false" aria-controls="drawView" tabindex="-1" data-view-tab>
+            <i class="ti ti-arrows-shuffle" aria-hidden="true"></i>
+            <span data-i18n="viewDraw">Жеребкування</span>
+        </button>
+    </div>
+
+    <!-- DRAW VIEW -->
+    <section class="card hidden" id="drawView" role="tabpanel" aria-labelledby="viewDrawTab" hidden>
+        <div class="card-header">
+            <i class="ti ti-arrows-shuffle card-heading-icon" aria-hidden="true"></i>
+            <h2 class="card-title" id="draw-title" data-i18n="drawTitle">Жеребкування груп</h2>
+        </div>
+        <p class="sheets-hint" data-i18n="drawHint"></p>
+
+        <div class="button-row draw-load-row">
+            <button type="button" class="btn btn-secondary" id="drawLoadButton">
+                <i class="ti ti-cloud-download" aria-hidden="true"></i>
+                <span data-i18n="btnDrawLoad">Завантажити гравців з таблиці</span>
+            </button>
+        </div>
+        <div id="drawStatus" class="alert hidden" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+
+        <div id="drawPickBlock" class="hidden" hidden>
+            <h3 class="section-title heading-with-icon" id="draw-players-heading">
+                <i class="ti ti-users" aria-hidden="true"></i>
+                <span data-i18n="drawPlayersTitle">Хто грає сьогодні</span>
+                <span class="player-count-badge" id="drawSelectedCount" aria-live="polite">0</span>
+            </h3>
+            <div class="draw-tools">
+                <div class="form-group">
+                    <label class="visually-hidden" for="drawSearch" data-i18n="drawSearchLabel">Пошук гравця</label>
+                    <input type="search" id="drawSearch" autocomplete="off" data-i18n-placeholder="drawSearchLabel">
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="drawClearSelection">
+                    <i class="ti ti-square-off" aria-hidden="true"></i>
+                    <span data-i18n="btnDrawClearSelection">Зняти всі</span>
+                </button>
+            </div>
+            <ul class="draw-player-list" id="drawPlayerList" aria-labelledby="draw-players-heading"></ul>
+            <div class="draw-tools">
+                <div class="form-group">
+                    <label class="visually-hidden" for="drawGuestName" data-i18n="drawGuestLabel">Новий гравець</label>
+                    <input type="text" id="drawGuestName" autocomplete="off" data-i18n-placeholder="drawGuestLabel">
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" id="drawAddGuest">
+                    <i class="ti ti-user-plus" aria-hidden="true"></i>
+                    <span data-i18n="btnDrawAddGuest">Додати</span>
+                </button>
+            </div>
+
+            <div class="draw-settings">
+                <div class="form-group">
+                    <label for="drawGroupCount" data-i18n="groupCountLabel">Кількість груп</label>
+                    <select id="drawGroupCount"></select>
+                </div>
+                <p class="draw-info" id="drawInfo" aria-live="polite"></p>
+            </div>
+            <div id="drawError" class="alert alert-error hidden" role="alert" aria-live="assertive" aria-atomic="true" tabindex="-1" hidden></div>
+            <button type="button" class="btn btn-primary btn-full" id="drawGenerateButton">
+                <i class="ti ti-arrows-shuffle" aria-hidden="true"></i>
+                <span data-i18n="btnDrawGenerate">Жеребкувати</span>
+            </button>
+        </div>
+
+        <div id="drawResult" class="hidden" hidden>
+            <h3 class="section-title heading-with-icon" id="draw-result-heading" tabindex="-1">
+                <i class="ti ti-layout-grid" aria-hidden="true"></i>
+                <span data-i18n="drawResultTitle">Групи</span>
+                <span class="draw-variant" id="drawVariant"></span>
+            </h3>
+            <div class="draw-groups" id="drawGroups"></div>
+            <div class="button-row draw-actions">
+                <button type="button" class="btn btn-secondary" id="drawRepeatButton">
+                    <i class="ti ti-refresh" aria-hidden="true"></i>
+                    <span data-i18n="btnDrawRepeat">Інший варіант</span>
+                </button>
+                <button type="button" class="btn btn-primary" id="drawCopyButton">
+                    <i class="ti ti-copy" aria-hidden="true"></i>
+                    <span data-i18n="btnDrawCopy">Копіювати для n01</span>
+                </button>
+                <button type="button" class="btn btn-success" id="drawToRatingButton">
+                    <i class="ti ti-arrow-right" aria-hidden="true"></i>
+                    <span data-i18n="btnDrawToRating">Перенести в розрахунок</span>
+                </button>
+            </div>
+            <div id="drawCopyStatus" class="alert alert-success hidden" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+        </div>
+    </section>
+
+    <div id="ratingView" role="tabpanel" aria-labelledby="viewRatingTab">
     <!-- STEPS NAV -->
     <nav aria-labelledby="steps-label">
     <span class="visually-hidden" id="steps-label" data-i18n="stepsLabel">Етапи розрахунку рейтингу</span>
@@ -451,12 +547,14 @@
         </div>
     </section>
     </form>
+    </div>
 
     <div class="visually-hidden" id="app-status" role="status" aria-live="polite" aria-atomic="true"></div>
 </main>
 
 <script src="./js/app.js?v=16" defer></script>
-<script src="./js/sheets.js?v=2" defer></script>
+<script src="./js/sheets.js?v=3" defer></script>
 <script src="./js/n01.js?v=1" defer></script>
+<script src="./js/draw.js?v=1" defer></script>
 </body>
 </html>

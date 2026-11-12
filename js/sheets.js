@@ -9,7 +9,7 @@
     const STORAGE_TOKEN='dartsSheetsToken';
     const DATALIST_ID='sheetsPlayersDatalist';
     let sheetRatings=new Map();
-    let sheetMeta={lastDate:'',savedDates:[],aliases:{}};
+    let sheetMeta={lastDate:'',savedDates:[],aliases:{},aliasList:[]};
     let pendingAliases=[];
 
     Object.assign(i18n.uk,{
@@ -77,7 +77,7 @@
         sheetRatings=new Map(data.players.map(p=>[nameKey(p.name),{name:p.name,rating:Number(p.rating)||0}]));
         const aliases={};
         (data.aliases||[]).forEach(a=>{ if(a.alias&&a.name) aliases[n01Core.normalize(a.alias)]=a.name; });
-        sheetMeta={lastDate:data.lastDate||'',savedDates:data.savedDates||[],aliases};
+        sheetMeta={lastDate:data.lastDate||'',savedDates:data.savedDates||[],aliases,aliasList:(data.aliases||[]).filter(a=>a.alias&&a.name)};
         renderDatalist();
         return data.players.length;
     }
@@ -213,6 +213,7 @@
         fetchRatings,
         ratings:()=>sheetRatings,
         aliases:()=>sheetMeta.aliases,
+        aliasList:()=>sheetMeta.aliasList,
         lastDate:()=>sheetMeta.lastDate,
         savedDates:()=>sheetMeta.savedDates,
         setPendingAliases:list=>{ pendingAliases=list; },
