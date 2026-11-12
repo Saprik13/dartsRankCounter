@@ -113,7 +113,123 @@ const drawCore = (function(){
         ).join('\n\n');
     }
 
-    return { groupCapacities, serpentineTargets, variantCount, seedPlayersSerpentine, suggestedGroupCount, average, n01Names, formatGroups };
+    /* ── Match order inside a group ──
+       [a, b, m]: positions are 1-based by seed inside the group (1 = highest rating);
+       m is the club's "м" number from its schedule sheet (0 = none). Club order for 3–6 players. */
+    const SCHEDULES = {
+        2: [[1,2,0]],
+        3: [[1,3,0],[2,3,0],[1,2,0]],
+        4: [[1,3,4],[2,4,3],[1,4,1],[2,3,1],[3,4,3],[1,2,4]],
+        5: [[2,5,3],[1,4,2],[3,5,1],[2,4,5],[1,3,4],[4,5,3],[2,3,1],[1,5,4],[3,4,2],[1,2,5]],
+        6: [[1,4,6],[2,5,4],[3,6,1],[2,4,5],[1,6,3],[3,5,2],[4,6,5],[2,3,4],[1,5,6],[2,6,3],[4,5,6],[1,3,2],[5,6,1],[3,4,5],[1,2,4]]
+    };
+
+    // Fallback for 7+ players: circle method, no markers.
+    function circleSchedule(size){
+        const slots = Array.from({ length: size % 2 ? size + 1 : size }, (_, i) => i + 1);
+        const games = [];
+        for(let round = 0; round < slots.length - 1; round++){
+            for(let i = 0; i < slots.length / 2; i++){
+                const a = slots[i], b = slots[slots.length - 1 - i];
+                if(a <= size && b <= size) games.push([Math.min(a, b), Math.max(a, b), 0]);
+            }
+            slots.splice(1, 0, slots.pop());
+        }
+        return games;
+    }
+
+    function groupSchedule(size){ return SCHEDULES[size] || circleSchedule(size); }
+
+    function nextPowerOfTwo(n){ let p = 2; while(p < n) p *= 2; return p; }
+
+    function randomTpid(used){
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let id;
+        do { id = Array.from({ length:4 }, () => chars[Math.floor(Math.random() * chars.length)]).join(''); } while(used.has(id));
+        used.add(id);
+        return id;
+    }
+
+    // Settings copied from "Lutsk Pub Darts 05.11.2026" (groups: 501, best of 3 legs;
+    // playoff best of 3, semi-final and final best of 5).
+    const RR_SETTING = {
+        round_robin:1, show_order:1, include_leg:0, limit:1, low_win:0, limit_leg_count:2, drawMode:0,
+        limit_set_count:2, limit_set_leg_count:2, startScore:501, match_type:'01', limit_rounds:1, overkill:0,
+        rounds:13, changeFirst:0, exitResult:0, autoNext:1, setOrder:0, schedule:[], point:0, point_w:2,
+        point_d:1, point_l:0, include_set:0, include_set_leg:0, priority_win:0, exclude_from_stats:0, game_setting:[]
+    };
+    const T_SETTING = {
+        tournament:1, t3:0, auto_continue:1, disp_no:1, sequential:0, show_no_all:0, show_badge:1, limit:1,
+        low_win:0, limit_leg_count:2, limit_set_count:2, limit_set_leg_count:2,
+        game_setting:[
+            { round:-2, limit:1, match_type:'01', roundLimit:0, maxRound:15, overkill:0, limit_leg_count:3 },
+            { round:-1, limit:1, match_type:'01', roundLimit:0, maxRound:15, overkill:0, limit_leg_count:3 }
+        ],
+        changeFirst:0, exitResult:1, autoNext:1, setOrder:0, schedule:[], startScore:501, match_type:'01',
+        limit_rounds:1, overkill:0, rounds:13, exclude_from_stats:0
+    };
+
+    function dayMonthYear(isoDate){
+        const [y, m, d] = String(isoDate).split('-');
+        return `${d}.${m}.${y}`;
+    }
+
+    // Plain-text match order, e.g. "Група 1: Форманюк – Іра (м4); ...".
+    function scheduleText(groups, names, groupLabel, markerLabel){
+        return groups.map((members, g) => {
+            const name = i => names.get(members[i - 1].name) || members[i - 1].name;
+            const games = groupSchedule(members.length).map(([a, b, m]) =>
+                `${name(a)} – ${name(b)}` + (m ? ` (${markerLabel}${m})` : ''));
+            return `${groupLabel} ${g + 1}: ${games.join('; ')}`;
+        }).join('\n');
+    }
+
+    // Tournament JSON in the format n01 exports/imports (admin "import settings").
+    function buildN01Tournament(groups, names, { date, title, joinPass = '12345', details = '' } = {}){
+        const used = new Set();
+        const tpidByName = new Map();
+        const entry_list = [];
+        groups.flat().forEach((player, i) => {
+            const tpid = randomTpid(used);
+            tpidByName.set(player.name, tpid);
+            entry_list.push({ name: names.get(player.name) || player.name, tpid, startScore:0, match_type:'01', index:i + 1 });
+        });
+        const groupSize = Math.max(...groups.map(g => g.length));
+        const rr_table = groups.map(g => {
+            const row = g.map(p => tpidByName.get(p.name));
+            while(row.length < groupSize) row.push('');
+            return row;
+        });
+        const rr_seq = groups.map(g => groupSchedule(g.length).map(([a, b]) => [tpidByName.get(g[a - 1].name), tpidByName.get(g[b - 1].name)]));
+        const rr_order = {};
+        [...new Set(groups.map(g => g.length))].forEach(size => {
+            rr_order[String(size)] = groupSchedule(size).map(([a, b]) => [a - 1, b - 1]);
+        });
+        const withPlayoff = groups.length > 1;
+        // Everyone except the last of each group goes to the playoff (as on 22.10–05.11).
+        const advancing = groups.reduce((sum, g) => sum + Math.max(1, g.length - 1), 0);
+        const bracketSize = Math.max(4, nextPowerOfTwo(advancing));
+        const t_table = [];
+        for(let n = bracketSize; n >= 1; n /= 2) t_table.push(Array(n).fill(''));
+        return {
+            status:20, kind:'darts',
+            title: title || `Lutsk Pub Darts ${dayMonthYear(date)}`,
+            t_date:0, details, image:'https://i.postimg.cc/FzvkvtSQ/Elvis.jpg', color:'#f8fafd',
+            theme:'', theme_css:'', lang:'', chat:1, show_avg:1, auto_complete:1, confirm_start:0,
+            dynamic_avg:0, lf:0, join_pass:joinPass, scorer_pass:'', game_type:5, individual_pass:0,
+            hide_sns:0, common_join:1, show_entry_no:0, team_games:0, name_sep:'', private:0,
+            select_first:0, win_lose:0, sd_legs:0, softdarts:0, oom:null,
+            rr_setting: { ...RR_SETTING, robin_count:groups.length, robin_player_count:groupSize },
+            rr_table, rr_result:[], rr_rank:[], rr_seq, rr_order,
+            rr_board: groups.map(() => 1),
+            t_setting: { ...T_SETTING, tournament: withPlayoff ? 1 : 0, t_player_count:bracketSize },
+            t_table, t_result:[], t_title:['', ''],
+            entry_list, t_player:[], t_order:[], t_order_fix:[], cricketOnly:0
+        };
+    }
+
+    return { groupCapacities, serpentineTargets, variantCount, seedPlayersSerpentine, suggestedGroupCount, average, n01Names, formatGroups,
+        groupSchedule, scheduleText, buildN01Tournament };
 })();
 
 if(typeof module !== 'undefined') module.exports = drawCore;
@@ -161,6 +277,12 @@ if(typeof document !== 'undefined') (function(){
         drawReady:g=>`Готово: ${g} груп.`,
         drawMovedToRating:n=>`Перенесено ${n} гравців у розрахунок.`,
         drawSelectLabel:(name,rating)=>`${name}, рейтинг ${rating}`,
+        drawOrderTitle:'Порядок ігор',
+        drawMarker:'м',
+        drawExportTitle:'Турнір для n01',
+        drawExportHint:'Файл містить гравців, групи й порядок ігор (позначки «м» дублюються в описі турніру). Налаштування матчів як 05.11: 501, до 2 легів, півфінал і фінал до 3. Плей-оф порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
+        btnDrawJson:'Завантажити JSON для n01',
+        drawJsonSaved:name=>`Файл ${name} збережено.`,
     });
     Object.assign(i18n.en, {
         viewTabsLabel:'Section',
@@ -194,6 +316,12 @@ if(typeof document !== 'undefined') (function(){
         drawReady:g=>`Done: ${g} groups.`,
         drawMovedToRating:n=>`Moved ${n} players to the calculator.`,
         drawSelectLabel:(name,rating)=>`${name}, rating ${rating}`,
+        drawOrderTitle:'Match order',
+        drawMarker:'м',
+        drawExportTitle:'Tournament for n01',
+        drawExportHint:'The file holds players, groups and match order (the “m” marks are also copied into the tournament description). Match settings as on 05.11: 501, best of 3 legs, semi-final and final best of 5. The playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
+        btnDrawJson:'Download JSON for n01',
+        drawJsonSaved:name=>`Saved ${name}.`,
     });
 
     function storageGet(key, fallback){ try{ return JSON.parse(localStorage.getItem(key)) ?? fallback; }catch(e){ return fallback; } }
@@ -403,7 +531,25 @@ if(typeof document !== 'undefined') (function(){
             avg.className = 'draw-avg';
             avg.setAttribute('aria-label', `${t('drawAvgLabel')}: ${drawCore.average(members).toFixed(1).replace('.', ',')}`);
             avg.textContent = `${t('drawAvg')} ${drawCore.average(members).toFixed(1).replace('.', ',')}`;
-            card.append(heading, list, avg);
+            const order = document.createElement('details');
+            order.className = 'draw-order';
+            const summary = document.createElement('summary');
+            summary.textContent = t('drawOrderTitle');
+            const games = document.createElement('ol');
+            drawCore.groupSchedule(members.length).forEach(([a, b, m]) => {
+                const nick = i => names.get(members[i - 1].name) || members[i - 1].name;
+                const game = document.createElement('li');
+                game.textContent = `${nick(a)} – ${nick(b)}`;
+                if(m){
+                    const marker = document.createElement('span');
+                    marker.className = 'draw-order-marker';
+                    marker.textContent = ` (${t('drawMarker')}${m})`;
+                    game.append(marker);
+                }
+                games.append(game);
+            });
+            order.append(summary, games);
+            card.append(heading, list, avg, order);
             return card;
         });
         $('drawGroups').replaceChildren(...cards);
@@ -422,6 +568,24 @@ if(typeof document !== 'undefined') (function(){
         }catch(e){
             setStatus('drawCopyStatus', 'error', t('drawCopyFailed') + '\n\n' + text);
         }
+    }
+
+    function downloadJson(){
+        if(!lastGroups) return;
+        const names = drawCore.n01Names(lastGroups.flat(), dartsSheets.aliasList());
+        const date = $('drawDate').value || new Date().toISOString().slice(0, 10);
+        const details = drawCore.scheduleText(lastGroups, names, i18n.uk.drawGroup, i18n.uk.drawMarker);
+        const data = drawCore.buildN01Tournament(lastGroups, names, { date, details });
+        const fileName = `lutsk-pub-darts-${date}.json`;
+        const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type:'application/json' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(url), 0);
+        setStatus('drawCopyStatus', 'success', t('drawJsonSaved', fileName));
     }
 
     function sendToRating(){
@@ -446,6 +610,13 @@ if(typeof document !== 'undefined') (function(){
         announce(t('drawMovedToRating', players.length));
     }
 
+    // Tournaments are on Thursdays: default to today if it is Thursday, else the next one.
+    function nextThursday(){
+        const d = new Date();
+        d.setDate(d.getDate() + ((4 - d.getDay() + 7) % 7));
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
     function init(){
         document.querySelectorAll('[data-view-tab]').forEach(tab => {
             tab.addEventListener('click', () => activateView(tab));
@@ -461,6 +632,8 @@ if(typeof document !== 'undefined') (function(){
         $('drawRepeatButton').addEventListener('click', () => generate(true));
         $('drawCopyButton').addEventListener('click', copyForN01);
         $('drawToRatingButton').addEventListener('click', sendToRating);
+        $('drawJsonButton').addEventListener('click', downloadJson);
+        $('drawDate').value = nextThursday();
         // Re-render translated bits when the language changes.
         ['btnUA','btnEN'].forEach(id => $(id).addEventListener('click', () => {
             if(pool.length){ renderPool(); renderGroupOptions(groupCount()); updateInfo(); }

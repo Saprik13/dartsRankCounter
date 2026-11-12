@@ -716,3 +716,8 @@ select.place-select{
 .draw-player label,
 .draw-variant{ text-transform:none; letter-spacing:normal; }
 .draw-player label{ margin:0; color:var(--text); }
+.draw-order{ margin-top:8px; font-size:12px; }
+.draw-order > summary{ cursor:pointer; color:var(--text2); }
+.draw-order ol{ margin:6px 0 0 18px; display:grid; gap:3px; }
+.draw-order-marker{ color:var(--text2); }
+.draw-export{ margin-top:20px; }

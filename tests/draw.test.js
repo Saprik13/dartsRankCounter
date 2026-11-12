@@ -44,3 +44,32 @@ assert.strictEqual(
     'Група 1\nІра\n\nГрупа 2\nФорманюк'
 );
 console.log('draw tests passed');
+
+// Club match orders: every pair exactly once.
+for(const size of [2,3,4,5,6,7,8]){
+    const games = draw.groupSchedule(size);
+    assert.strictEqual(games.length, size * (size - 1) / 2, `games for ${size}`);
+    const pairs = new Set(games.map(([a, b]) => `${a}-${b}`));
+    assert.strictEqual(pairs.size, games.length, `unique pairs for ${size}`);
+    games.forEach(([a, b]) => assert.ok(a >= 1 && b <= size && a < b));
+}
+assert.deepStrictEqual(draw.groupSchedule(3).map(([a,b]) => `${a}-${b}`), ['1-3','2-3','1-2']);
+
+// Tournament JSON shaped like n01's export (05.11: groups of 4, 3, 4).
+const eleven = draw.seedPlayersSerpentine(ranks(11), 3);
+const shortNames = new Map(eleven.flat().map(p => [p.name, p.name]));
+const json = draw.buildN01Tournament(eleven, shortNames, { date:'2026-11-12' });
+assert.strictEqual(json.title, 'Lutsk Pub Darts 12.11.2026');
+assert.strictEqual(json.entry_list.length, 11);
+assert.deepStrictEqual(json.rr_table.map(r => r.filter(Boolean).length), [4,3,4]);
+assert.strictEqual(json.rr_table[1][3], '', 'short group padded like n01 does');
+assert.strictEqual(json.rr_setting.robin_count, 3);
+assert.strictEqual(json.rr_setting.robin_player_count, 4);
+assert.deepStrictEqual(json.rr_seq.map(s => s.length), [6,3,6]);
+assert.deepStrictEqual(json.rr_order['4'], [[0,2],[1,3],[0,3],[1,2],[2,3],[0,1]]);
+assert.deepStrictEqual(json.t_table.map(r => r.length), [8,4,2,1]);
+assert.ok(json.t_table.flat().every(x => x === ''), 'playoff is filled manually later');
+const tp = new Set(json.entry_list.map(e => e.tpid));
+assert.strictEqual(tp.size, 11);
+json.rr_seq.flat(2).forEach(id => assert.ok(tp.has(id)));
+console.log('n01 export tests passed');
