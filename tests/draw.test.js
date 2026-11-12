@@ -70,6 +70,7 @@ assert.deepStrictEqual(json.rr_order['4'], [[0,2],[1,3],[0,3],[1,2],[2,3],[0,1]]
 assert.deepStrictEqual(json.t_table.map(r => r.length), [8,4,2,1]);
 assert.ok(json.t_table.flat().every(x => x === ''), 'playoff is filled manually later');
 assert.strictEqual(json.t_setting.t_player_count, 8);
+assert.strictEqual(json.t_setting.t3, 1, '3rd-place match');
 assert.strictEqual(json.rr_setting.rounds, 15);
 assert.strictEqual(json.t_setting.rounds, 15);
 const tp = new Set(json.entry_list.map(e => e.tpid));

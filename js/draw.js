@@ -168,7 +168,7 @@ const drawCore = (function(){
     }
 
     // Settings as on "Lutsk Pub Darts 12.11.2026": 501, 15-round limit, groups best of 3 legs;
-    // playoff best of 3, semi-final and final best of 5.
+    // playoff best of 3, semi-final and final best of 5, with a 3rd-place match.
     const RR_SETTING = {
         round_robin:1, show_order:1, include_leg:0, limit:1, low_win:0, limit_leg_count:2, drawMode:0,
         limit_set_count:2, limit_set_leg_count:2, startScore:501, match_type:'01', limit_rounds:1, overkill:0,
@@ -176,7 +176,7 @@ const drawCore = (function(){
         point_d:1, point_l:0, include_set:0, include_set_leg:0, priority_win:0, exclude_from_stats:0, game_setting:[]
     };
     const T_SETTING = {
-        tournament:1, t3:0, auto_continue:1, disp_no:1, sequential:0, show_no_all:0, show_badge:1, limit:1,
+        tournament:1, t3:1, auto_continue:1, disp_no:1, sequential:0, show_no_all:0, show_badge:1, limit:1,
         low_win:0, limit_leg_count:2, limit_set_count:2, limit_set_leg_count:2,
         game_setting:[
             { round:-2, limit:1, match_type:'01', roundLimit:0, maxRound:15, overkill:0, limit_leg_count:3 },
@@ -292,7 +292,7 @@ if(typeof document !== 'undefined') (function(){
         drawSelectLabel:(name,rating)=>`${name}, рейтинг ${rating}`,
         drawOrderTitle:'Порядок ігор',
         drawExportTitle:'Турнір для n01',
-        drawExportHint:'Файл містить гравців, групи й порядок ігор. Налаштування: 501, ліміт 15 раундів, у групах до 2 легів, півфінал і фінал до 3. Плей-оф на 8 гравців порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
+        drawExportHint:'Файл містить гравців, групи й порядок ігор. Налаштування: 501, ліміт 15 раундів, у групах до 2 легів, півфінал і фінал до 3, є матч за 3-тє місце. Плей-оф на 8 гравців порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
         btnDrawJson:'Завантажити JSON для n01',
         drawJsonSaved:name=>`Файл ${name} збережено.`,
     });
@@ -330,7 +330,7 @@ if(typeof document !== 'undefined') (function(){
         drawSelectLabel:(name,rating)=>`${name}, rating ${rating}`,
         drawOrderTitle:'Match order',
         drawExportTitle:'Tournament for n01',
-        drawExportHint:'The file holds players, groups and match order. Settings: 501, 15-round limit, groups best of 3 legs, semi-final and final best of 5. The top-8 playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
+        drawExportHint:'The file holds players, groups and match order. Settings: 501, 15-round limit, groups best of 3 legs, semi-final and final best of 5, with a 3rd-place match. The top-8 playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
         btnDrawJson:'Download JSON for n01',
         drawJsonSaved:name=>`Saved ${name}.`,
     });
