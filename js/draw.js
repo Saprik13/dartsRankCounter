@@ -115,7 +115,7 @@ const drawCore = (function(){
 
     /* ── Match order inside a group ──
        [a, b, m]: positions are 1-based by seed inside the group (1 = highest rating);
-       m is the club's "м" number from its schedule sheet (0 = none). Club order for 3–6 players. */
+       m is the scorer ("маркер") from the club sheet, kept for reference only. Club order for 3–6 players. */
     const SCHEDULES = {
         2: [[1,2,0]],
         3: [[1,3,0],[2,3,0],[1,2,0]],
@@ -174,12 +174,11 @@ const drawCore = (function(){
         return `${d}.${m}.${y}`;
     }
 
-    // Plain-text match order, e.g. "Група 1: Форманюк – Іра (м4); ...".
-    function scheduleText(groups, names, groupLabel, markerLabel){
+    // Plain-text match order, e.g. "Група 1: Форманюк – Іра; ...".
+    function scheduleText(groups, names, groupLabel){
         return groups.map((members, g) => {
             const name = i => names.get(members[i - 1].name) || members[i - 1].name;
-            const games = groupSchedule(members.length).map(([a, b, m]) =>
-                `${name(a)} – ${name(b)}` + (m ? ` (${markerLabel}${m})` : ''));
+            const games = groupSchedule(members.length).map(([a, b]) => `${name(a)} – ${name(b)}`);
             return `${groupLabel} ${g + 1}: ${games.join('; ')}`;
         }).join('\n');
     }
@@ -278,9 +277,8 @@ if(typeof document !== 'undefined') (function(){
         drawMovedToRating:n=>`Перенесено ${n} гравців у розрахунок.`,
         drawSelectLabel:(name,rating)=>`${name}, рейтинг ${rating}`,
         drawOrderTitle:'Порядок ігор',
-        drawMarker:'м',
         drawExportTitle:'Турнір для n01',
-        drawExportHint:'Файл містить гравців, групи й порядок ігор (позначки «м» дублюються в описі турніру). Налаштування матчів як 05.11: 501, до 2 легів, півфінал і фінал до 3. Плей-оф порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
+        drawExportHint:'Файл містить гравців, групи й порядок ігор (порядок ігор також дублюється в описі турніру). Налаштування матчів як 05.11: 501, до 2 легів, півфінал і фінал до 3. Плей-оф порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
         btnDrawJson:'Завантажити JSON для n01',
         drawJsonSaved:name=>`Файл ${name} збережено.`,
     });
@@ -317,9 +315,8 @@ if(typeof document !== 'undefined') (function(){
         drawMovedToRating:n=>`Moved ${n} players to the calculator.`,
         drawSelectLabel:(name,rating)=>`${name}, rating ${rating}`,
         drawOrderTitle:'Match order',
-        drawMarker:'м',
         drawExportTitle:'Tournament for n01',
-        drawExportHint:'The file holds players, groups and match order (the “m” marks are also copied into the tournament description). Match settings as on 05.11: 501, best of 3 legs, semi-final and final best of 5. The playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
+        drawExportHint:'The file holds players, groups and match order (the match order is also copied into the tournament description). Match settings as on 05.11: 501, best of 3 legs, semi-final and final best of 5. The playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
         btnDrawJson:'Download JSON for n01',
         drawJsonSaved:name=>`Saved ${name}.`,
     });
@@ -536,16 +533,10 @@ if(typeof document !== 'undefined') (function(){
             const summary = document.createElement('summary');
             summary.textContent = t('drawOrderTitle');
             const games = document.createElement('ol');
-            drawCore.groupSchedule(members.length).forEach(([a, b, m]) => {
+            drawCore.groupSchedule(members.length).forEach(([a, b]) => {
                 const nick = i => names.get(members[i - 1].name) || members[i - 1].name;
                 const game = document.createElement('li');
                 game.textContent = `${nick(a)} – ${nick(b)}`;
-                if(m){
-                    const marker = document.createElement('span');
-                    marker.className = 'draw-order-marker';
-                    marker.textContent = ` (${t('drawMarker')}${m})`;
-                    game.append(marker);
-                }
                 games.append(game);
             });
             order.append(summary, games);
@@ -574,7 +565,7 @@ if(typeof document !== 'undefined') (function(){
         if(!lastGroups) return;
         const names = drawCore.n01Names(lastGroups.flat(), dartsSheets.aliasList());
         const date = $('drawDate').value || new Date().toISOString().slice(0, 10);
-        const details = drawCore.scheduleText(lastGroups, names, i18n.uk.drawGroup, i18n.uk.drawMarker);
+        const details = drawCore.scheduleText(lastGroups, names, i18n.uk.drawGroup);
         const data = drawCore.buildN01Tournament(lastGroups, names, { date, details });
         const fileName = `lutsk-pub-darts-${date}.json`;
         const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type:'application/json' }));
