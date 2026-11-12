@@ -292,7 +292,7 @@ if(typeof document !== 'undefined') (function(){
         drawSelectLabel:(name,rating)=>`${name}, рейтинг ${rating}`,
         drawOrderTitle:'Порядок ігор',
         drawExportTitle:'Турнір для n01',
-        drawExportHint:'Файл містить гравців, групи й порядок ігор (порядок ігор також дублюється в описі турніру). Налаштування: 501, ліміт 15 раундів, у групах до 2 легів, півфінал і фінал до 3. Плей-оф на 8 гравців порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
+        drawExportHint:'Файл містить гравців, групи й порядок ігор. Налаштування: 501, ліміт 15 раундів, у групах до 2 легів, півфінал і фінал до 3. Плей-оф на 8 гравців порожній, його заповнюють після групового етапу. Імпортувати може адмін турніру.',
         btnDrawJson:'Завантажити JSON для n01',
         drawJsonSaved:name=>`Файл ${name} збережено.`,
     });
@@ -330,7 +330,7 @@ if(typeof document !== 'undefined') (function(){
         drawSelectLabel:(name,rating)=>`${name}, rating ${rating}`,
         drawOrderTitle:'Match order',
         drawExportTitle:'Tournament for n01',
-        drawExportHint:'The file holds players, groups and match order (the match order is also copied into the tournament description). Settings: 501, 15-round limit, groups best of 3 legs, semi-final and final best of 5. The top-8 playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
+        drawExportHint:'The file holds players, groups and match order. Settings: 501, 15-round limit, groups best of 3 legs, semi-final and final best of 5. The top-8 playoff is left empty and filled after the group stage. Only the tournament admin can import it.',
         btnDrawJson:'Download JSON for n01',
         drawJsonSaved:name=>`Saved ${name}.`,
     });
@@ -576,8 +576,7 @@ if(typeof document !== 'undefined') (function(){
         if(!lastGroups) return;
         const names = drawCore.n01Names(lastGroups.flat(), dartsSheets.aliasList());
         const date = $('drawDate').value || new Date().toISOString().slice(0, 10);
-        const details = drawCore.scheduleText(lastGroups, names, i18n.uk.drawGroup);
-        const data = drawCore.buildN01Tournament(lastGroups, names, { date, details });
+        const data = drawCore.buildN01Tournament(lastGroups, names, { date });
         const fileName = `lutsk-pub-darts-${date}.json`;
         const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type:'application/json' }));
         const link = document.createElement('a');
