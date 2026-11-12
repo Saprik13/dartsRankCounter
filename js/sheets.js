@@ -4,7 +4,7 @@
 ═══════════════════════════════════════ */
 (function(){
     // Optional: hardcode the deployed Apps Script URL here so every visitor gets it.
-    const SHEETS_DEFAULT_URL='';
+    const SHEETS_DEFAULT_URL='https://script.google.com/macros/s/AKfycbziVT5Mw0fhEnGz9s09YaZrZoZgoVtNSKjI5yBv7Q028Uw50SP7KHvOFjuxE5sWMjw7qQ/exec';
     const STORAGE_URL='dartsSheetsUrl';
     const STORAGE_TOKEN='dartsSheetsToken';
     const DATALIST_ID='sheetsPlayersDatalist';
