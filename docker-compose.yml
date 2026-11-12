@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8000:80"
+    volumes:
+      # Live reload of local edits without rebuilding the image
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+      - ./favicon.ico:/usr/share/nginx/html/favicon.ico:ro
+      - ./css:/usr/share/nginx/html/css:ro
+      - ./images:/usr/share/nginx/html/images:ro
+      - ./js:/usr/share/nginx/html/js:ro

@@ -219,6 +219,10 @@
                     <i class="ti ti-table-import" aria-hidden="true"></i>
                     <span data-i18n="tabImport">Імпорт з таблиці</span>
                 </button>
+                <button type="button" class="tab-btn" id="inputN01Tab" role="tab" aria-selected="false" aria-controls="inputN01Panel" tabindex="-1" data-input-tab>
+                    <i class="ti ti-target-arrow" aria-hidden="true"></i>
+                    <span data-i18n="tabN01">n01darts</span>
+                </button>
             </div>
         </nav>
 
@@ -268,6 +272,72 @@
 
             <div id="importError" class="alert alert-error hidden" role="alert" aria-live="assertive" aria-atomic="true" tabindex="-1" hidden></div>
             <div id="importSuccess" class="alert alert-success hidden" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+        </section>
+
+        <details class="sheets-panel" id="sheetsPanel">
+            <summary class="label-with-icon">
+                <i class="ti ti-table-share" aria-hidden="true"></i>
+                <span data-i18n="sheetsTitle">Google Таблиця</span>
+            </summary>
+            <p class="sheets-hint" data-i18n="sheetsHint"></p>
+            <div class="grid-2 sheets-fields">
+                <div class="form-group">
+                    <label for="sheetsUrl" data-i18n="sheetsUrlLabel">Адреса Apps Script (веб-застосунок)</label>
+                    <input type="url" id="sheetsUrl" autocomplete="off" spellcheck="false" placeholder="https://script.google.com/macros/s/.../exec">
+                </div>
+                <div class="form-group">
+                    <label for="sheetsToken" data-i18n="sheetsTokenLabel">Ключ для запису</label>
+                    <input type="password" id="sheetsToken" autocomplete="off">
+                </div>
+            </div>
+            <div class="button-row">
+                <button type="button" class="btn btn-secondary" id="sheetsLoadButton">
+                    <i class="ti ti-cloud-download" aria-hidden="true"></i>
+                    <span data-i18n="btnSheetsLoad">Підставити рейтинги з таблиці</span>
+                </button>
+            </div>
+            <div id="sheetsLoadStatus" class="alert hidden" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+            <datalist id="sheetsPlayersDatalist"></datalist>
+        </details>
+
+        <section id="inputN01Panel" class="input-tab-panel hidden" role="tabpanel" aria-labelledby="inputN01Tab" hidden>
+            <p class="sheets-hint" data-i18n="n01Hint"></p>
+            <div class="n01-find">
+                <div class="form-group">
+                    <label for="n01Keyword" data-i18n="n01KeywordLabel">Пошук турнірів</label>
+                    <input type="text" id="n01Keyword" autocomplete="off">
+                </div>
+                <button type="button" class="btn btn-secondary" id="n01FindButton">
+                    <i class="ti ti-search" aria-hidden="true"></i>
+                    <span data-i18n="btnN01Find">Знайти турніри</span>
+                </button>
+            </div>
+            <div class="n01-find hidden" id="n01PickRow" hidden>
+                <div class="form-group">
+                    <label for="n01Tournament" data-i18n="n01TournamentLabel">Турнір</label>
+                    <select id="n01Tournament"></select>
+                </div>
+                <button type="button" class="btn btn-primary" id="n01LoadButton">
+                    <i class="ti ti-download" aria-hidden="true"></i>
+                    <span data-i18n="btnN01Load">Завантажити результати</span>
+                </button>
+            </div>
+            <div id="n01Status" class="alert hidden" role="status" aria-live="polite" aria-atomic="true" hidden></div>
+            <div id="n01MatchBlock" class="hidden" hidden>
+                <h3 class="section-title" id="n01-match-heading" data-i18n="n01MatchTitle">Гравці турніру</h3>
+                <div class="n01-row n01-header" aria-hidden="true">
+                    <div data-i18n="n01ColN01">У n01</div>
+                    <div data-i18n="n01ColPlace">Місце</div>
+                    <div data-i18n="n01ColSheet">У таблиці</div>
+                    <div></div>
+                </div>
+                <ul id="n01MatchList" aria-labelledby="n01-match-heading"></ul>
+                <div id="n01Unresolved" class="alert alert-error hidden" role="status" aria-live="polite" hidden></div>
+                <button type="button" class="btn btn-primary btn-full" id="n01ApplyButton">
+                    <i class="ti ti-check" aria-hidden="true"></i>
+                    <span data-i18n="btnN01Apply">Застосувати</span>
+                </button>
+            </div>
         </section>
 
         <div id="playerSetupError" class="alert alert-error hidden" role="alert" aria-live="assertive" aria-atomic="true" tabindex="-1" hidden></div>
@@ -337,6 +407,17 @@
                 <span data-i18n="btnNewTournament">Новий турнір</span>
             </button>
         </div>
+        <div class="sheets-save">
+            <div class="form-group">
+                <label for="sheetsDate" data-i18n="sheetsDateLabel">Дата турніру</label>
+                <input type="date" id="sheetsDate">
+            </div>
+            <button type="button" class="btn btn-success" id="sheetsSaveButton">
+                <i class="ti ti-cloud-upload" aria-hidden="true"></i>
+                <span data-i18n="btnSheetsSave">Зберегти в Google Таблицю</span>
+            </button>
+        </div>
+        <div id="sheetsSaveStatus" class="alert hidden" role="status" aria-live="polite" aria-atomic="true" hidden></div>
         <div id="copyAlert" class="alert alert-success hidden" role="status" aria-live="polite" aria-atomic="true" data-i18n="copiedMsg" hidden>Скопійовано!</div>
         <div class="table-scroll" role="region" aria-labelledby="results-table-caption" tabindex="0">
             <table class="result-table">
@@ -374,6 +455,8 @@
     <div class="visually-hidden" id="app-status" role="status" aria-live="polite" aria-atomic="true"></div>
 </main>
 
-<script src="./js/app.js?v=15" defer></script>
+<script src="./js/app.js?v=16" defer></script>
+<script src="./js/sheets.js?v=2" defer></script>
+<script src="./js/n01.js?v=1" defer></script>
 </body>
 </html>

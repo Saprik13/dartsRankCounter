@@ -168,7 +168,7 @@ body{
 .input-method-nav,
 .input-tab-panel{ width:100%; }
 .input-tabs{
-    display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+    display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
     width:100%; max-width:none; margin-bottom:var(--section-block-gap);
 }
 .input-tabs .tab-btn{
@@ -621,4 +621,42 @@ select.place-select{
     .skip-link{ border-color:LinkText; }
     .btn-primary,
     .btn-success{ border:2px solid ButtonText; forced-color-adjust:none; }
+}
+
+/* ── GOOGLE SHEETS ── */
+.sheets-panel{
+    margin:0 0 var(--section-block-gap); padding:12px 14px;
+    border:1px solid var(--border); border-radius:var(--radius-md); background:var(--surface2);
+}
+.sheets-panel > summary{ cursor:pointer; font-weight:700; list-style:none; }
+.sheets-panel > summary::-webkit-details-marker{ display:none; }
+.sheets-panel > summary::after{ content:'▾'; margin-inline-start:auto; color:var(--text2); }
+.sheets-panel[open] > summary{ margin-bottom:10px; }
+.sheets-panel[open] > summary::after{ content:'▴'; }
+.sheets-hint{ margin:0 0 12px; color:var(--text2); font-size:12px; line-height:1.45; }
+.sheets-fields{ margin-bottom:12px; }
+.sheets-panel .alert{ margin:12px 0 0; }
+.sheets-save{ display:flex; align-items:flex-end; flex-wrap:wrap; gap:8px; margin:12px 0; }
+.sheets-save .form-group{ margin-bottom:0; }
+.alert-info{ background:rgba(10,132,255,0.1); border:1px solid rgba(10,132,255,0.25); color:var(--accent); text-align:center; }
+
+/* ── n01darts IMPORT ── */
+.n01-find{ display:flex; align-items:flex-end; flex-wrap:wrap; gap:8px; margin-bottom:12px; }
+.n01-find .form-group{ flex:1 1 220px; margin-bottom:0; }
+#n01MatchList{ list-style:none; margin:0 0 12px; padding:0; }
+.n01-row{
+    display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1.6fr) 90px;
+    align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--border);
+}
+.n01-header{ color:var(--text2); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.n01-name{ font-weight:700; overflow-wrap:anywhere; }
+.n01-place{ color:var(--text2); }
+.n01-pick{ display:grid; gap:6px; min-width:0; }
+.n01-how{ color:var(--text2); font-size:11px; }
+.n01-row-unresolved .n01-name{ color:var(--orange); }
+@media (max-width: 640px){
+    .n01-header{ display:none; }
+    .n01-row{ grid-template-columns:1fr 1fr; }
+    .n01-pick{ grid-column:1 / -1; }
+    .n01-how{ display:none; }
 }

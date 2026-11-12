@@ -15,7 +15,9 @@ project.
 - Automatic rating recalculation and ranking
 - CSV, Excel, and clipboard-ready result export
 - Responsive layouts for phones, tablets, and desktop screens
-- Fully client-side processing with no data uploads
+- Import a finished tournament from n01darts.com: places are derived from the group stage and playoff bracket, players are matched to the rating sheet by surname or nickname
+- Optional Google Sheets sync: fill ratings from the sheet and save a tournament as a new date column (see `google-apps-script/README.md`)
+- Client-side processing; data leaves the browser only when you use the Google Sheets sync
 
 ## How to use
 
@@ -35,18 +37,28 @@ npx --yes http-server . -p 8000
 
 Then open `http://localhost:8000/`.
 
+Or with Docker:
+
+```bash
+docker compose up -d --build
+```
+
 ## Project structure
 
 ```text
 css/             Shared and responsive styles
 images/logo.svg  Randomizer-style dartboard mark and favicon
 js/app.js        Rating logic, rendering, import, export, and localization
+js/sheets.js     Google Sheets sync through an Apps Script web app
+js/n01.js        n01darts tournament import, place calculation and name matching
+tests/           Node tests for the n01 logic (fixtures are real tournaments)
+google-apps-script/  Apps Script code and setup guide
 index.html       Application markup
 ```
 
 ## Validation
 
-Run the JavaScript syntax check:
+Run the syntax check and the n01 tests:
 
 ```powershell
 npm test
@@ -57,5 +69,5 @@ as tablet and desktop viewport sizes.
 
 ## Privacy
 
-All player data is processed in the browser. The application does not send
-names, ratings, or tournament results to a server.
+All player data is processed in the browser. Names, ratings and results are sent
+only to your own Google Sheet, and only when the Google Sheets sync is used.
