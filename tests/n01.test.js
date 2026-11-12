@@ -23,6 +23,28 @@ assert.deepStrictEqual(oct15.byName, {
     'Юля':'quarter', 'Грицюк':'quarter'
 });
 
+// Same tournament imported into n01 three times: entry_list holds every player three times
+// under different tpids, and the playoff was seeded with the copies from an older import.
+{
+    const data = JSON.parse(JSON.stringify(require('./fixtures/2026-10-22.json')));
+    const original = data.entry_list;
+    const alias = {};
+    original.forEach(e => { alias[e.tpid] = e.tpid + '_b'; });
+    data.entry_list = [
+        ...original.map(e => ({ tpid:e.tpid + '_a', name:e.name })),
+        ...original.map(e => ({ tpid:alias[e.tpid], name:e.name })),
+        ...original
+    ];
+    const swap = id => alias[id] || id;
+    data.t_table = data.t_table.map(round => round.map(swap));
+    data.t_result = data.t_result.map(r => Object.fromEntries(Object.entries(r).map(([a, opp]) =>
+        [swap(a), Object.fromEntries(Object.entries(opp).map(([b, v]) => [swap(b), v]))])));
+    const result = n01.computePlaces(data);
+    assert.strictEqual(result.players.length, 8, 'one row per player');
+    assert.deepStrictEqual(result.warnings, []);
+    assert.deepStrictEqual(Object.fromEntries(result.players.map(p => [p.name, p.place])), oct22.byName);
+}
+
 const sheet = ['Матвійчук Олександр','Форманюк Андрій','Лажнєвський Андрій','Софлюк Юлія','Іра','Корпусов Андрій'];
 assert.deepStrictEqual(n01.matchName('Форманюк', sheet, {}), { status:'token', name:'Форманюк Андрій' });
 assert.deepStrictEqual(n01.matchName('Лажневський', sheet, {}), { status:'token', name:'Лажнєвський Андрій' }, 'є/е spelling');

@@ -159,12 +159,17 @@ const drawCore = (function(){
 
     function groupSchedule(size){ return SCHEDULES[size] || circleSchedule(size); }
 
-    function randomTpid(used){
+    // tpid derived from the player's name, so importing the same draw twice reuses the same ids
+    // instead of giving n01 a second, unrelated copy of every player.
+    function nameTpid(name, used){
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let id;
-        do { id = Array.from({ length:4 }, () => chars[Math.floor(Math.random() * chars.length)]).join(''); } while(used.has(id));
-        used.add(id);
-        return id;
+        for(let salt = 0; ; salt++){
+            let h = 0x811c9dc5;
+            for(const ch of `${salt}:${name}`){ h ^= ch.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; }
+            let id = '';
+            for(let i = 0; i < 4; i++){ id += chars[h % chars.length]; h = Math.floor(h / chars.length); }
+            if(!used.has(id)){ used.add(id); return id; }
+        }
     }
 
     // Settings as on "Lutsk Pub Darts 12.11.2026": 501, 15-round limit, groups best of 3 legs;
@@ -208,7 +213,7 @@ const drawCore = (function(){
         const tpidByName = new Map();
         const entry_list = [];
         groups.flat().forEach((player, i) => {
-            const tpid = randomTpid(used);
+            const tpid = nameTpid(String(names.get(player.name) || player.name).trim().toLowerCase(), used);
             tpidByName.set(player.name, tpid);
             entry_list.push({ name: names.get(player.name) || player.name, tpid, startScore:0, match_type:'01', index:i + 1 });
         });

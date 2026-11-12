@@ -103,24 +103,40 @@ const n01Core = (function(){
         const hasBracket = Object.keys(bracket).length > 0;
         const type = hasBracket || groupCount > 1 ? 'se' : 'sg';
         const warnings = [];
-        const players = entries.map(entry => {
-            const id = entry.tpid;
-            const info = groupInfo[id] || {};
+        // Importing a tournament JSON into n01 more than once appends a fresh copy of every
+        // player to entry_list, so one person can own several tpids (e.g. the group stage
+        // under one and the playoff under another). Skip entries that never played and
+        // merge the rest by name.
+        const seated = new Set([data.rr_table, data.t_table, data.t3_table]
+            .flatMap(table => Array.isArray(table) ? table.flat() : []).filter(Boolean));
+        const people = new Map();
+        entries.forEach(entry => {
+            if(seated.size && !seated.has(entry.tpid)) return;
+            const key = names[entry.tpid].toLowerCase();
+            if(!people.has(key)) people.set(key, []);
+            people.get(key).push(entry.tpid);
+        });
+        const players = [...people.values()].map(ids => {
+            const groupId = ids.find(id => groupInfo[id]);
+            const bracketId = ids.find(id => bracket[id]);
+            const id = bracketId || groupId || ids[0];
+            const name = names[id];
+            const info = groupInfo[groupId] || {};
             let place = '';
             if(type === 'sg'){
                 place = info.rank && info.rank <= 7 ? String(info.rank) : '';
-            } else if(bracket[id]){
-                place = bracket[id].stage === 'early' ? '' : bracket[id].stage;
-                if(bracket[id].stage === 'early') warnings.push({ code:'early_round', name:names[id] });
+            } else if(bracketId){
+                place = bracket[bracketId].stage === 'early' ? '' : bracket[bracketId].stage;
+                if(bracket[bracketId].stage === 'early') warnings.push({ code:'early_round', name });
             } else if(info.rank >= 3 && info.rank <= 5){
                 place = 'group' + info.rank;
             } else {
-                warnings.push({ code:'no_place', name:names[id] });
+                warnings.push({ code:'no_place', name });
             }
-            return { id, name:names[id], place, group:info.group, groupRank:info.rank };
+            return { id, name, place, group:info.group, groupRank:info.rank, inBracket:Boolean(bracketId) };
         });
         // Tied group ranks for players who did not reach the playoff.
-        const outside = players.filter(p => type === 'se' && !bracket[p.id] && p.groupRank);
+        const outside = players.filter(p => type === 'se' && !p.inBracket && p.groupRank);
         outside.forEach(p => {
             if(outside.some(o => o !== p && o.group === p.group && o.groupRank === p.groupRank)){
                 warnings.push({ code:'group_tie', name:p.name });
