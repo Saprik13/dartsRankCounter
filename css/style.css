@@ -607,8 +607,8 @@ select.place-select{
 }
 .skip-link:focus{ transform:translateY(0); }
 :focus-visible{
-    outline:3px solid #ffd166 !important;
-    outline-offset:3px;
+    outline:2px solid var(--accent) !important;
+    outline-offset:2px;
 }
 input:focus-visible,
 select:focus-visible,
