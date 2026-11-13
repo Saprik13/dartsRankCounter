@@ -241,7 +241,7 @@ select{ cursor:pointer; }
 .btn-sm{ block-size:38px; padding:0 12px; font-size:13px; }
 .btn-full{ width:100%; block-size:44px; font-size:12px; }
 .button-row{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
-.next-action{ margin-top:20px; }
+.next-action{ margin-top:var(--section-block-gap); }
 .result-actions{ margin-bottom:16px; }
 .result-back-action{ display:grid; margin-top:16px; }
 .mapping-edit{ margin-top:12px; }
@@ -610,6 +610,11 @@ select.place-select{
     outline:3px solid #ffd166 !important;
     outline-offset:3px;
 }
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible{
+    outline:none !important;
+}
 .lang-btn:focus-visible{ outline-offset:-3px; }
 [hidden],
 .hidden{ display:none !important; }
@@ -625,7 +630,7 @@ select.place-select{
 
 /* ── GOOGLE SHEETS ── */
 .sheets-panel{
-    margin:0 0 var(--section-block-gap); padding:12px 14px;
+    margin:var(--section-block-gap) 0; padding:12px 14px;
     border:1px solid var(--border); border-radius:var(--radius-md); background:var(--surface2);
 }
 .sheets-panel > summary{ cursor:pointer; font-weight:700; list-style:none; }
